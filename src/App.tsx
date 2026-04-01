@@ -53,7 +53,7 @@ export default function App() {
   const [selectedRequestId, setSelectedRequestId] = useState<string>();
   const [selectedTaskId, setSelectedTaskId] = useState<string>();
   const [selectedEventId, setSelectedEventId] = useState<string>();
-  const [timelineZoom, setTimelineZoom] = useState(1);
+  const [timelineZoom, setTimelineZoom] = useState(64);
   const [keyboardPanStepSec, setKeyboardPanStepSec] = useState(1);
 
   useEffect(() => {
@@ -162,7 +162,7 @@ export default function App() {
               <input
                 type="range"
                 min="1"
-                max="64"
+                max="128"
                 step="0.5"
                 value={timelineZoom}
                 onChange={(event) => setTimelineZoom(Number(event.target.value))}
