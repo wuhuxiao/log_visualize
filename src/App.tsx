@@ -228,7 +228,7 @@ export default function App() {
         {activeView === "ucTimeline" && (
           <UCTaskTimelineView
             tasks={visibleTasks}
-            initialZoom={timelineZoom}
+            initialZoom={Math.min(128, timelineZoom + 0.5)}
             keyboardPanStepMs={keyboardPanStepSec * 1000}
             selectedTaskId={selectedTaskId}
             onSelectTask={(taskId) => {
