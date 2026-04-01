@@ -46,6 +46,16 @@ describe("deriveAbstractUCTimelineSegments", () => {
         bytes: 2048
       }),
       createTask({
+        id: "posix-dump-1",
+        workerId: "pid:3901",
+        ucKind: "posix",
+        category: "Cache2Backend",
+        dispatchAt: 162,
+        finishAt: 180,
+        costMs: 18,
+        bytes: 4096
+      }),
+      createTask({
         id: "lookup-2",
         workerId: "pid:901",
         ucKind: "lookup",

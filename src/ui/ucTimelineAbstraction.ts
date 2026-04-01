@@ -122,7 +122,7 @@ function phaseColor(phase: AbstractUCTimelineSegment["phase"]) {
 export function deriveAbstractUCTimelineSegments(tasks: NormalizedUCTask[]) {
   const clusters = clusterLookupTasks(tasks);
   const loadTasks = tasks.filter((task) => task.category === "Load" || task.category === "Backend2Cache");
-  const dumpTasks = tasks.filter((task) => task.category === "Dump" || task.category === "Cache2Backend");
+  const dumpTasks = tasks.filter((task) => task.category === "Dump");
   const segments: AbstractUCTimelineSegment[] = [];
 
   for (const [index, cluster] of clusters.entries()) {
