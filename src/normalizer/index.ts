@@ -14,7 +14,7 @@ export function analyzeSources(sources: LogSource[]): AnalysisResult {
   const ucTasks = correlateUCTasks(events, requests);
   const scheduleBatches = correlateScheduleBatches(events, requests, ucTasks);
   const processSummaries = buildProcessSummaries(ucTasks);
-  const anomalies = detectAnomalies(events, requests, ucTasks);
+  const anomalies = detectAnomalies(events, requests, ucTasks, scheduleBatches);
 
   return {
     sources,

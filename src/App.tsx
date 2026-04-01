@@ -167,7 +167,7 @@ export default function App() {
           </label>
         </header>
 
-        <OverviewCards requests={visibleRequests} tasks={visibleTasks} anomalies={result.anomalies} />
+        <OverviewCards requests={visibleRequests} tasks={visibleTasks} events={visibleEvents} />
         <ViewTabs activeView={activeView} onChange={setActiveView} />
 
         {activeView === "process" && <ProcessSummaryView summaries={visibleSummaries} requests={visibleRequests} tasks={visibleTasks} />}
@@ -201,6 +201,7 @@ export default function App() {
           <SchedulerView
             events={visibleEvents}
             scheduleBatches={visibleScheduleBatches}
+            requests={visibleRequests}
             onSelectEvent={(eventId) => {
               setSelectedEventId(eventId);
               setSelectedTaskId(undefined);

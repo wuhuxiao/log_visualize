@@ -116,7 +116,9 @@ export interface AnomalyRecord {
     | "slow_scheduler_response"
     | "sequence_group_missing"
     | "request_incomplete"
-    | "cache_posix_gap";
+    | "cache_posix_gap"
+    | "low_cache_bandwidth"
+    | "slow_model_compute";
   severity: "warning" | "error";
   title: string;
   description: string;

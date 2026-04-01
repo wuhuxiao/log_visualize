@@ -106,4 +106,12 @@ describe("analyzeSources", () => {
     expect(batch?.reporterMs).toBeDefined();
     expect(request?.relatedScheduleBatchIds).toContain(batch?.id ?? "");
   });
+
+  it("marks request anomalies using cache bandwidth and model compute percentiles", () => {
+    const result = analyzeSources([scheduledBatchSource]);
+    const request = result.requests[0];
+
+    expect(request?.anomalies.some((anomaly) => anomaly.type === "low_cache_bandwidth")).toBe(true);
+    expect(request?.anomalies.some((anomaly) => anomaly.type === "slow_model_compute")).toBe(true);
+  });
 });

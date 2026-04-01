@@ -10,16 +10,26 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import type { ParsedEvent, ScheduleBatch } from "../../types/models";
+import type { NormalizedRequest, ParsedEvent, ScheduleBatch } from "../../types/models";
 import { formatDuration, formatTimestamp } from "../../utils/time";
 
 interface SchedulerViewProps {
   events: ParsedEvent[];
   scheduleBatches: ScheduleBatch[];
+  requests: NormalizedRequest[];
   onSelectEvent: (eventId: string) => void;
 }
 
-export function SchedulerView({ events, scheduleBatches, onSelectEvent }: SchedulerViewProps) {
+export function SchedulerView({ events, scheduleBatches, requests, onSelectEvent }: SchedulerViewProps) {
+  const anomalousRequestIds = new Set(
+    requests
+      .filter((request) =>
+        request.anomalies.some(
+          (anomaly) => anomaly.type === "low_cache_bandwidth" || anomaly.type === "slow_model_compute"
+        )
+      )
+      .map((request) => request.id)
+  );
   const schedulerEvents = events.filter((event) => event.eventType === "scheduler");
   const schedulingData = schedulerEvents
     .filter((event) => event.eventName === "scheduler_scheduling")
@@ -36,6 +46,7 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
     .filter((event) => event.eventName === "scheduler_response")
     .map((event) => {
       const batch = scheduleBatches.find((item) => item.responseEventIds.includes(event.id));
+      const batchHasRequestAnomaly = batch?.requestIds.some((requestId) => anomalousRequestIds.has(requestId)) ?? false;
       return {
         id: event.id,
         timeLabel: formatTimestamp(event.timestampMs),
@@ -43,7 +54,10 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
         scheduleCostMs: Number(event.extracted.scheduleCostMs ?? 0),
         totalIterCostMs: Number(event.extracted.totalIterCostMs ?? 0),
         overlapCount: batch?.lookupCount ?? 0,
-        anomaly: event.anomalyTags.includes("slow_scheduler_response")
+        anomaly:
+          batchHasRequestAnomaly ||
+          event.anomalyTags.includes("low_cache_bandwidth") ||
+          event.anomalyTags.includes("slow_model_compute")
       };
     });
 

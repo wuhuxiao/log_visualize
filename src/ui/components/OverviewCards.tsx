@@ -1,18 +1,18 @@
-import type { AnomalyRecord, NormalizedRequest, NormalizedUCTask } from "../../types/models";
+import type { NormalizedRequest, NormalizedUCTask, ParsedEvent } from "../../types/models";
 import { formatDuration } from "../../utils/time";
 
 interface OverviewCardsProps {
   requests: NormalizedRequest[];
   tasks: NormalizedUCTask[];
-  anomalies: AnomalyRecord[];
+  events: ParsedEvent[];
 }
 
-export function OverviewCards({ requests, tasks, anomalies }: OverviewCardsProps) {
+export function OverviewCards({ requests, tasks, events }: OverviewCardsProps) {
   const cacheTaskCosts = tasks.filter((task) => task.ucKind === "cache" && task.costMs !== undefined).map((task) => task.costMs!);
   const posixTaskCosts = tasks.filter((task) => task.ucKind === "posix" && task.costMs !== undefined).map((task) => task.costMs!);
-  const slowestResponse = anomalies
-    .filter((anomaly) => anomaly.type === "slow_scheduler_response")
-    .map((anomaly) => Number(anomaly.metrics?.responseCostMs ?? 0));
+  const slowestResponse = events
+    .filter((event) => event.eventType === "scheduler" && event.eventName === "scheduler_response")
+    .map((event) => Number(event.extracted.responseCostMs ?? event.costMs ?? 0));
 
   const cards = [
     { label: "总请求数", value: requests.length.toString() },
