@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { NormalizedRequest, NormalizedUCTask } from "../../types/models";
 import { TimelineChart, type TimelineItem } from "./TimelineChart";
 
@@ -32,45 +33,59 @@ export function RequestTimelineView({
   onSelectRequest,
   onSelectTask
 }: RequestTimelineViewProps) {
-  if (requests.length === 0) {
-    return <div className="empty-state">当前过滤条件下没有可展示的请求时序。</div>;
-  }
+  const tasksByRequestId = useMemo(() => {
+    const grouped = new Map<string, NormalizedUCTask[]>();
+    for (const task of tasks) {
+      for (const relation of task.relatedRequestIds) {
+        const bucket = grouped.get(relation.requestId) ?? [];
+        bucket.push(task);
+        grouped.set(relation.requestId, bucket);
+      }
+    }
+    return grouped;
+  }, [tasks]);
 
-  const items: TimelineItem[] = [];
-
-  requests.forEach((request) => {
-    const requestLabel = request.llmMgrReqId ?? request.engineReqId ?? request.seqId ?? request.id;
-    const mainLane = `Req ${requestLabel}`;
-    const taskLane = `${mainLane} / UC`;
-    const requestStart = request.stages.enteredAt ?? request.stages.addedAt ?? request.stages.insertedAt;
-    const requestEnd =
-      request.stages.endedAt ?? request.stages.releaseResponseAt ?? request.lifecycleEvents.at(-1)?.timestampMs;
-
-    if (requestStart !== undefined || requestEnd !== undefined) {
-      items.push({
-        id: `request:${request.id}`,
-        lane: mainLane,
-        label: requestLabel,
-        start: requestStart,
-        end: requestEnd,
-        color: "#2563eb",
-        legendKey: "request-main",
-        legendLabel: "Request 主流程",
-        selected: request.id === selectedRequestId,
-        meta: {
-          llmMgrReqId: request.llmMgrReqId ?? request.llmMgrReqIdRaw ?? null,
-          engineReqId: request.engineReqId ?? null,
-          seqId: request.seqId ?? null,
-          dpRank: request.dpRank ?? null
-        },
-        anomaly: request.anomalies.length > 0
-      });
+  const items = useMemo<TimelineItem[]>(() => {
+    if (requests.length === 0) {
+      return [];
     }
 
-    stageLabels.forEach((stage) => {
-      const time = request.stages[stage.key];
-      if (time !== undefined) {
-        items.push({
+    const nextItems: TimelineItem[] = [];
+    for (const request of requests) {
+      const requestLabel = request.llmMgrReqId ?? request.engineReqId ?? request.seqId ?? request.id;
+      const mainLane = `Req ${requestLabel}`;
+      const taskLane = `${mainLane} / UC`;
+      const requestStart = request.stages.enteredAt ?? request.stages.addedAt ?? request.stages.insertedAt;
+      const requestEnd =
+        request.stages.endedAt ?? request.stages.releaseResponseAt ?? request.lifecycleEvents.at(-1)?.timestampMs;
+
+      if (requestStart !== undefined || requestEnd !== undefined) {
+        nextItems.push({
+          id: `request:${request.id}`,
+          lane: mainLane,
+          label: requestLabel,
+          start: requestStart,
+          end: requestEnd,
+          color: "#2563eb",
+          legendKey: "request-main",
+          legendLabel: "Request 主流程",
+          selected: request.id === selectedRequestId,
+          meta: {
+            llmMgrReqId: request.llmMgrReqId ?? request.llmMgrReqIdRaw ?? null,
+            engineReqId: request.engineReqId ?? null,
+            seqId: request.seqId ?? null,
+            dpRank: request.dpRank ?? null
+          },
+          anomaly: request.anomalies.length > 0
+        });
+      }
+
+      for (const stage of stageLabels) {
+        const time = request.stages[stage.key];
+        if (time === undefined) {
+          continue;
+        }
+        nextItems.push({
           id: `request:${request.id}:${String(stage.key)}`,
           lane: mainLane,
           label: stage.label,
@@ -86,13 +101,11 @@ export function RequestTimelineView({
           }
         });
       }
-    });
 
-    tasks
-      .filter((task) => task.relatedRequestIds.some(({ requestId }) => requestId === request.id))
-      .forEach((task) => {
+      const relatedTasks = tasksByRequestId.get(request.id) ?? [];
+      for (const task of relatedTasks) {
         const isDump = task.category === "Dump" || task.category === "Cache2Backend";
-        items.push({
+        nextItems.push({
           id: `task:${task.id}`,
           lane: taskLane,
           label: `${task.category} ${task.taskId ?? ""}`.trim(),
@@ -108,12 +121,19 @@ export function RequestTimelineView({
             pid: task.pid ?? null,
             taskId: task.taskId ?? null,
             category: task.category,
-            confidence: task.relatedRequestIds.find(({ requestId }) => requestId === request.id)?.confidence ?? null
+            confidence: task.relatedRequestIds.find((relation) => relation.requestId === request.id)?.confidence ?? null
           },
           anomaly: task.anomalies.length > 0
         });
-      });
-  });
+      }
+    }
+
+    return nextItems;
+  }, [requests, tasksByRequestId, selectedRequestId, selectedTaskId]);
+
+  if (items.length === 0) {
+    return <div className="empty-state">当前过滤条件下没有可展示的请求时序。</div>;
+  }
 
   return (
     <TimelineChart

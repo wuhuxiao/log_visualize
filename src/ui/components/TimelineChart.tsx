@@ -25,10 +25,38 @@ interface TimelineChartProps {
 
 const MIN_BAR_LABEL_WIDTH = 84;
 const MAX_ZOOM = 24;
+const LANE_HEIGHT = 34;
+const OVERSCAN_LANES = 10;
+const DEFAULT_VIEWPORT_HEIGHT = 720;
+
+function getItemRange(items: TimelineItem[]) {
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+
+  for (const item of items) {
+    const start = item.start ?? item.end;
+    const end = item.end ?? item.start;
+    if (start !== undefined && start < min) {
+      min = start;
+    }
+    if (end !== undefined && end > max) {
+      max = end;
+    }
+  }
+
+  if (!Number.isFinite(min) || !Number.isFinite(max)) {
+    return { min: 0, max: 1 };
+  }
+
+  return { min, max: max <= min ? min + 1 : max };
+}
 
 export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: TimelineChartProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(DEFAULT_VIEWPORT_HEIGHT);
+  const [scrollTop, setScrollTop] = useState(0);
   const [zoom, setZoom] = useState(initialZoom);
   const [pan, setPan] = useState(0);
 
@@ -38,36 +66,37 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
 
   useEffect(() => {
     const node = containerRef.current;
-    if (!node) {
+    const viewport = viewportRef.current;
+    if (!node || !viewport) {
       return;
     }
 
-    const observer = new ResizeObserver((entries) => {
-      const width = entries[0]?.contentRect.width ?? 0;
-      setContainerWidth(width);
+    const observer = new ResizeObserver(() => {
+      setContainerWidth(node.getBoundingClientRect().width);
+      setViewportHeight(viewport.getBoundingClientRect().height || DEFAULT_VIEWPORT_HEIGHT);
     });
+
     observer.observe(node);
+    observer.observe(viewport);
     setContainerWidth(node.getBoundingClientRect().width);
+    setViewportHeight(viewport.getBoundingClientRect().height || DEFAULT_VIEWPORT_HEIGHT);
 
     return () => observer.disconnect();
   }, []);
 
   const lanes = useMemo(() => [...new Set(items.map((item) => item.lane))], [items]);
-  const min = Math.min(...items.map((item) => item.start ?? item.end ?? Number.MAX_SAFE_INTEGER));
-  const max = Math.max(...items.map((item) => item.end ?? item.start ?? Number.MIN_SAFE_INTEGER));
-  const safeMin = Number.isFinite(min) ? min : 0;
-  const safeMax = Number.isFinite(max) ? max : safeMin + 1;
+  const laneIndexMap = useMemo(() => new Map(lanes.map((lane, index) => [lane, index])), [lanes]);
+  const { min: safeMin, max: safeMax } = useMemo(() => getItemRange(items), [items]);
   const fullSpan = Math.max(1, safeMax - safeMin);
   const visibleSpan = fullSpan / zoom;
   const maxPanSpan = Math.max(0, fullSpan - visibleSpan);
   const visibleMin = safeMin + maxPanSpan * pan;
   const visibleMax = visibleMin + visibleSpan;
   const width = Math.floor(containerWidth || 720);
-  const laneHeight = 34;
-  const padding = { top: 24, left: 180, right: 24, bottom: 44 };
+  const padding = { top: 24, left: 180, right: 24, bottom: 20 };
   const innerWidth = Math.max(200, width - padding.left - padding.right);
-  const innerHeight = lanes.length * laneHeight;
-  const totalHeight = innerHeight + padding.top + padding.bottom;
+  const totalContentHeight = lanes.length * LANE_HEIGHT;
+  const totalHeight = totalContentHeight + padding.top + padding.bottom;
 
   useEffect(() => {
     setPan((current) => clamp(current, 0, 1));
@@ -75,7 +104,7 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
 
   const legendItems = useMemo(() => {
     const grouped = new Map<string, { label: string; color: string; count: number }>();
-    items.forEach((item) => {
+    for (const item of items) {
       const key = item.legendKey ?? item.label;
       const current = grouped.get(key) ?? {
         label: item.legendLabel ?? item.legendKey ?? item.label,
@@ -84,19 +113,32 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
       };
       current.count += 1;
       grouped.set(key, current);
-    });
+    }
     return [...grouped.entries()].map(([key, value]) => ({ key, ...value }));
   }, [items]);
+
+  const startLaneIndex = Math.max(0, Math.floor(scrollTop / LANE_HEIGHT) - OVERSCAN_LANES);
+  const endLaneIndex = Math.min(
+    lanes.length - 1,
+    Math.ceil((scrollTop + viewportHeight) / LANE_HEIGHT) + OVERSCAN_LANES
+  );
 
   const visibleItems = useMemo(
     () =>
       items.filter((item) => {
+        const laneIndex = laneIndexMap.get(item.lane);
+        if (laneIndex === undefined || laneIndex < startLaneIndex || laneIndex > endLaneIndex) {
+          return false;
+        }
+
         const start = item.start ?? item.end ?? safeMin;
         const end = item.end ?? item.start ?? start;
         return end >= visibleMin && start <= visibleMax;
       }),
-    [items, safeMin, visibleMin, visibleMax]
+    [items, laneIndexMap, startLaneIndex, endLaneIndex, safeMin, visibleMin, visibleMax]
   );
+
+  const visibleLanes = lanes.slice(startLaneIndex, endLaneIndex + 1);
 
   const xFor = (value: number) => {
     if (visibleMax === visibleMin) {
@@ -142,6 +184,7 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
           窗口: {formatTimestamp(visibleMin)} ~ {formatTimestamp(visibleMax)}
         </span>
         <span>缩放: {zoom.toFixed(2)}x</span>
+        <span>显示 lane: {Math.max(0, endLaneIndex - startLaneIndex + 1)} / {lanes.length}</span>
       </div>
 
       <div className="timeline-legend">
@@ -169,10 +212,15 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
         </label>
       </div>
 
-      <div ref={containerRef} className="timeline-scroll">
+      <div
+        ref={viewportRef}
+        className="timeline-scroll"
+        onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+      >
         <svg width={width} height={totalHeight} className="timeline-svg">
-          {lanes.map((lane, laneIndex) => {
-            const y = padding.top + laneIndex * laneHeight;
+          {visibleLanes.map((lane) => {
+            const laneIndex = laneIndexMap.get(lane) ?? 0;
+            const y = padding.top + laneIndex * LANE_HEIGHT;
             return (
               <g key={lane}>
                 <text x={16} y={y + 18} className="lane-label">
@@ -184,8 +232,12 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
           })}
 
           {visibleItems.map((item) => {
-            const laneIndex = lanes.indexOf(item.lane);
-            const y = padding.top + laneIndex * laneHeight;
+            const laneIndex = laneIndexMap.get(item.lane);
+            if (laneIndex === undefined) {
+              return null;
+            }
+
+            const y = padding.top + laneIndex * LANE_HEIGHT;
             const start = item.start ?? item.end ?? safeMin;
             const end = item.end ?? item.start ?? start;
             const x = xFor(start);
