@@ -30,6 +30,9 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
     const relatedTasks = result.ucTasks.filter((task) =>
       task.relatedRequestIds.some(({ requestId }) => requestId === selectedRequest.id)
     );
+    const relatedScheduleBatches = result.scheduleBatches.filter((batch) =>
+      batch.requestIds.includes(selectedRequest.id)
+    );
     const lookupTasks = relatedTasks.filter((task) => task.category === "Lookup");
     const nonLookupTasks = relatedTasks.filter((task) => task.category !== "Lookup");
 
@@ -76,6 +79,20 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
             </div>
           ))}
           {lookupTasks.length === 0 ? <div className="detail-muted">没有关联的 lookup task。</div> : null}
+        </div>
+        <h3>关联调度批次</h3>
+        <div className="detail-scroll-list">
+          {relatedScheduleBatches.map((batch) => (
+            <div key={batch.id} className="detail-card compact">
+              <strong>{batch.id}</strong>
+              <span>round: {batch.schedulingRound ?? "n/a"}</span>
+              <span>
+                窗口: {formatTimestamp(batch.startMs)} ~ {formatTimestamp(batch.endMs)}
+              </span>
+              <span>lookup: {formatDuration(batch.lookupTotalMs)}</span>
+            </div>
+          ))}
+          {relatedScheduleBatches.length === 0 ? <div className="detail-muted">没有关联到调度批次。</div> : null}
         </div>
         <h3>异常</h3>
         {renderAnomalies(selectedRequest.anomalies)}

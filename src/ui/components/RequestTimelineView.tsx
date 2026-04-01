@@ -1,15 +1,12 @@
 import { useMemo } from "react";
-import type { NormalizedRequest, NormalizedUCTask } from "../../types/models";
+import type { NormalizedRequest } from "../../types/models";
 import { TimelineChart, type TimelineItem } from "./TimelineChart";
 
 interface RequestTimelineViewProps {
   requests: NormalizedRequest[];
-  tasks: NormalizedUCTask[];
   initialZoom?: number;
   selectedRequestId?: string;
-  selectedTaskId?: string;
   onSelectRequest: (requestId: string) => void;
-  onSelectTask: (taskId: string) => void;
 }
 
 const stageLabels: Array<{ key: keyof NormalizedRequest["stages"]; label: string; color: string }> = [
@@ -26,35 +23,16 @@ const stageLabels: Array<{ key: keyof NormalizedRequest["stages"]; label: string
 
 export function RequestTimelineView({
   requests,
-  tasks,
   initialZoom = 2,
   selectedRequestId,
-  selectedTaskId,
-  onSelectRequest,
-  onSelectTask
+  onSelectRequest
 }: RequestTimelineViewProps) {
-  const tasksByRequestId = useMemo(() => {
-    const grouped = new Map<string, NormalizedUCTask[]>();
-    for (const task of tasks) {
-      for (const relation of task.relatedRequestIds) {
-        const bucket = grouped.get(relation.requestId) ?? [];
-        bucket.push(task);
-        grouped.set(relation.requestId, bucket);
-      }
-    }
-    return grouped;
-  }, [tasks]);
-
   const items = useMemo<TimelineItem[]>(() => {
-    if (requests.length === 0) {
-      return [];
-    }
-
     const nextItems: TimelineItem[] = [];
+
     for (const request of requests) {
       const requestLabel = request.llmMgrReqId ?? request.engineReqId ?? request.seqId ?? request.id;
       const mainLane = `Req ${requestLabel}`;
-      const taskLane = `${mainLane} / UC`;
       const requestStart = request.stages.enteredAt ?? request.stages.addedAt ?? request.stages.insertedAt;
       const requestEnd =
         request.stages.endedAt ?? request.stages.releaseResponseAt ?? request.lifecycleEvents.at(-1)?.timestampMs;
@@ -74,7 +52,8 @@ export function RequestTimelineView({
             llmMgrReqId: request.llmMgrReqId ?? request.llmMgrReqIdRaw ?? null,
             engineReqId: request.engineReqId ?? null,
             seqId: request.seqId ?? null,
-            dpRank: request.dpRank ?? null
+            dpRank: request.dpRank ?? null,
+            scheduleBatchCount: request.relatedScheduleBatchIds.length
           },
           anomaly: request.anomalies.length > 0
         });
@@ -101,35 +80,10 @@ export function RequestTimelineView({
           }
         });
       }
-
-      const relatedTasks = tasksByRequestId.get(request.id) ?? [];
-      for (const task of relatedTasks) {
-        const isDump = task.category === "Dump" || task.category === "Cache2Backend";
-        nextItems.push({
-          id: `task:${task.id}`,
-          lane: taskLane,
-          label: `${task.category} ${task.taskId ?? ""}`.trim(),
-          start: task.dispatchAt ?? task.startAt ?? task.finishAt,
-          end: task.finishAt ?? task.startAt ?? task.dispatchAt,
-          color: isDump ? "#b45309" : "#0f766e",
-          legendKey: `uc:${task.category}`,
-          legendLabel: `UC: ${task.category}`,
-          selected: task.id === selectedTaskId,
-          meta: {
-            requestId: requestLabel,
-            workerId: task.workerId,
-            pid: task.pid ?? null,
-            taskId: task.taskId ?? null,
-            category: task.category,
-            confidence: task.relatedRequestIds.find((relation) => relation.requestId === request.id)?.confidence ?? null
-          },
-          anomaly: task.anomalies.length > 0
-        });
-      }
     }
 
     return nextItems;
-  }, [requests, tasksByRequestId, selectedRequestId, selectedTaskId]);
+  }, [requests, selectedRequestId]);
 
   if (items.length === 0) {
     return <div className="empty-state">当前过滤条件下没有可展示的请求时序。</div>;
@@ -137,16 +91,12 @@ export function RequestTimelineView({
 
   return (
     <TimelineChart
-      title="多请求生命周期与相关 UC Task"
+      title="多请求生命周期时序"
       items={items}
       initialZoom={initialZoom}
       onItemClick={(itemId) => {
         if (itemId.startsWith("request:")) {
           onSelectRequest(itemId.split(":")[1] ?? "");
-          return;
-        }
-        if (itemId.startsWith("task:")) {
-          onSelectTask(itemId.split(":")[1] ?? "");
         }
       }}
     />

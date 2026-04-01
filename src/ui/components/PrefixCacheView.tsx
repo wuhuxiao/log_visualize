@@ -9,13 +9,15 @@ interface PrefixCacheViewProps {
 }
 
 export function PrefixCacheView({ events, requests, associations, onSelectRequest }: PrefixCacheViewProps) {
-  const prefixEvents = events.filter((event) => event.eventType === "prefix_cache");
+  const prefixEvents = events.filter(
+    (event) => event.eventType === "prefix_cache" && "scope" in event && event.scope === "request"
+  );
+
   const rows = prefixEvents.map((event) => {
     const association = associations.find((item) => item.eventId === event.id);
     const request = association?.requestId ? requests.find((item) => item.id === association.requestId) : undefined;
     return {
       id: event.id,
-      scope: "scope" in event ? event.scope : "request",
       requestId: request?.id,
       llmMgrReqId: request?.llmMgrReqId ?? request?.llmMgrReqIdRaw ?? "unmatched",
       localHitRate: Number(event.extracted.localHitRate ?? 0),
@@ -30,7 +32,7 @@ export function PrefixCacheView({ events, requests, associations, onSelectReques
   return (
     <div className="view-grid">
       <div className="chart-panel">
-        <h3>Prefix cache 命中率</h3>
+        <h3>Prefix Cache Reporter 命中率</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={rows}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -44,11 +46,10 @@ export function PrefixCacheView({ events, requests, associations, onSelectReques
         </ResponsiveContainer>
       </div>
       <div className="table-panel">
-        <h3>请求 / 全局 Prefix Cache</h3>
+        <h3>请求级 Prefix Cache Reporter</h3>
         <table className="data-table">
           <thead>
             <tr>
-              <th>scope</th>
               <th>request</th>
               <th>local tokens</th>
               <th>remote tokens</th>
@@ -61,7 +62,6 @@ export function PrefixCacheView({ events, requests, associations, onSelectReques
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} onClick={() => row.requestId && onSelectRequest(row.requestId)}>
-                <td>{row.scope}</td>
                 <td>{row.llmMgrReqId}</td>
                 <td>{row.localCachedTokens}</td>
                 <td>{row.remoteCachedTokens}</td>

@@ -10,17 +10,16 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { buildSchedulerLookupSummaries } from "../../aggregations/derivedMetrics";
-import type { NormalizedUCTask, ParsedEvent } from "../../types/models";
+import type { ParsedEvent, ScheduleBatch } from "../../types/models";
 import { formatDuration, formatTimestamp } from "../../utils/time";
 
 interface SchedulerViewProps {
   events: ParsedEvent[];
-  tasks: NormalizedUCTask[];
+  scheduleBatches: ScheduleBatch[];
   onSelectEvent: (eventId: string) => void;
 }
 
-export function SchedulerView({ events, tasks, onSelectEvent }: SchedulerViewProps) {
+export function SchedulerView({ events, scheduleBatches, onSelectEvent }: SchedulerViewProps) {
   const schedulerEvents = events.filter((event) => event.eventType === "scheduler");
   const schedulingData = schedulerEvents
     .filter((event) => event.eventName === "scheduler_scheduling")
@@ -36,27 +35,26 @@ export function SchedulerView({ events, tasks, onSelectEvent }: SchedulerViewPro
   const responseData = schedulerEvents
     .filter((event) => event.eventName === "scheduler_response")
     .map((event) => {
-      const time = event.timestampMs ?? 0;
-      const overlapCount = tasks.filter((task) => {
-        const start = task.dispatchAt ?? task.startAt ?? task.finishAt;
-        const end = task.finishAt ?? task.startAt ?? task.dispatchAt;
-        return start !== undefined && end !== undefined && start <= time + 50 && end >= time - 50;
-      }).length;
-
+      const batch = scheduleBatches.find((item) => item.responseEventIds.includes(event.id));
       return {
         id: event.id,
         timeLabel: formatTimestamp(event.timestampMs),
         responseCostMs: Number(event.extracted.responseCostMs ?? event.costMs ?? 0),
         scheduleCostMs: Number(event.extracted.scheduleCostMs ?? 0),
         totalIterCostMs: Number(event.extracted.totalIterCostMs ?? 0),
-        overlapCount,
+        overlapCount: batch?.lookupCount ?? 0,
         anomaly: event.anomalyTags.includes("slow_scheduler_response")
       };
     });
 
-  const lookupWindows = buildSchedulerLookupSummaries(events, tasks).map((row) => ({
-    ...row,
-    timeLabel: formatTimestamp(row.timestampMs)
+  const lookupWindows = scheduleBatches.map((batch) => ({
+    id: batch.id,
+    timeLabel: formatTimestamp(batch.endMs ?? batch.startMs),
+    workerCount: batch.workerIds.length,
+    requestCount: batch.requestIds.length,
+    lookupCount: batch.lookupCount,
+    lookupTotalMs: batch.lookupTotalMs,
+    schedulingRound: batch.schedulingRound ?? "n/a"
   }));
 
   return (
@@ -79,7 +77,7 @@ export function SchedulerView({ events, tasks, onSelectEvent }: SchedulerViewPro
       </div>
 
       <div className="chart-panel">
-        <h3>Response cost / overlap</h3>
+        <h3>Response cost / batch lookup</h3>
         <ResponsiveContainer width="100%" height={280}>
           <ComposedChart
             data={responseData}
@@ -101,7 +99,7 @@ export function SchedulerView({ events, tasks, onSelectEvent }: SchedulerViewPro
       </div>
 
       <div className="chart-panel">
-        <h3>每次调度后的 Lookup 总耗时</h3>
+        <h3>每个调度批次的 Lookup 总耗时</h3>
         <ResponsiveContainer width="100%" height={280}>
           <ComposedChart data={lookupWindows}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -127,7 +125,7 @@ export function SchedulerView({ events, tasks, onSelectEvent }: SchedulerViewPro
               <th>response cost</th>
               <th>schedule cost</th>
               <th>total iter cost</th>
-              <th>重叠 task 数</th>
+              <th>lookup count</th>
             </tr>
           </thead>
           <tbody>
@@ -145,23 +143,34 @@ export function SchedulerView({ events, tasks, onSelectEvent }: SchedulerViewPro
       </div>
 
       <div className="table-panel">
-        <h3>调度窗口 Lookup 汇总</h3>
+        <h3>调度批次与 Lookup 汇总</h3>
         <table className="data-table">
           <thead>
             <tr>
               <th>time</th>
-              <th>worker</th>
-              <th>phase</th>
+              <th>round</th>
+              <th>worker count</th>
+              <th>request count</th>
               <th>lookup count</th>
               <th>lookup total</th>
             </tr>
           </thead>
           <tbody>
             {lookupWindows.map((row) => (
-              <tr key={row.id} onClick={() => onSelectEvent(row.id)}>
+              <tr
+                key={row.id}
+                onClick={() => {
+                  const batch = scheduleBatches.find((item) => item.id === row.id);
+                  const firstEventId = batch?.responseEventIds[0] ?? batch?.schedulingEventIds[0];
+                  if (firstEventId) {
+                    onSelectEvent(firstEventId);
+                  }
+                }}
+              >
                 <td>{row.timeLabel}</td>
-                <td>{row.workerId}</td>
-                <td>{row.phase}</td>
+                <td>{String(row.schedulingRound)}</td>
+                <td>{row.workerCount}</td>
+                <td>{row.requestCount}</td>
                 <td>{row.lookupCount}</td>
                 <td>{formatDuration(row.lookupTotalMs)}</td>
               </tr>

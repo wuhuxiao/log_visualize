@@ -72,12 +72,27 @@ export default function App() {
       ),
     [result.events]
   );
+  const availableEventTypes = useMemo(
+    () => [...new Set(result.events.map((event) => event.eventType))].sort(),
+    [result.events]
+  );
 
   const visibleEvents = useMemo(() => filterEvents(result, filters), [filters, result]);
   const visibleRequests = useMemo(() => filterRequests(result, filters, visibleEvents), [filters, result, visibleEvents]);
   const visibleRequestIds = useMemo(() => new Set(visibleRequests.map((request) => request.id)), [visibleRequests]);
   const visibleTasks = useMemo(() => filterUCTasks(result, filters, visibleRequestIds), [filters, result, visibleRequestIds]);
   const visibleTaskIds = useMemo(() => new Set(visibleTasks.map((task) => task.id)), [visibleTasks]);
+  const visibleScheduleBatches = useMemo(
+    () =>
+      result.scheduleBatches.filter((batch) => {
+        const workerOk = filters.workerIds.length === 0 || batch.workerIds.some((workerId) => filters.workerIds.includes(workerId));
+        const pidOk = filters.pids.length === 0 || batch.pids.some((pid) => filters.pids.includes(pid));
+        const dpOk = filters.dpRanks.length === 0 || batch.dpRanks.some((dpRank) => filters.dpRanks.includes(dpRank));
+        const eventOk = filters.eventTypes.length === 0 || filters.eventTypes.includes("scheduler");
+        return workerOk && pidOk && dpOk && eventOk;
+      }),
+    [filters, result.scheduleBatches]
+  );
   const visibleSummaries = useMemo(
     () =>
       result.processSummaries.filter((summary) =>
@@ -122,6 +137,7 @@ export default function App() {
         workerIds={workerIds}
         pids={pids}
         dpRanks={dpRanks}
+        availableEventTypes={availableEventTypes}
         sources={sources}
         onFiltersChange={setFilters}
         onFilesSelected={handleFilesSelected}
@@ -167,27 +183,19 @@ export default function App() {
         {activeView === "requestTimeline" && (
           <RequestTimelineView
             requests={visibleRequests}
-            tasks={visibleTasks}
             initialZoom={timelineZoom}
             selectedRequestId={selectedRequestId}
-            selectedTaskId={selectedTaskId}
             onSelectRequest={(requestId) => {
               setSelectedRequestId(requestId);
               setSelectedTaskId(undefined);
               setSelectedEventId(undefined);
-            }}
-            onSelectTask={(taskId) => {
-              if (visibleTaskIds.has(taskId)) {
-                setSelectedTaskId(taskId);
-                setSelectedEventId(undefined);
-              }
             }}
           />
         )}
         {activeView === "scheduler" && (
           <SchedulerView
             events={visibleEvents}
-            tasks={visibleTasks}
+            scheduleBatches={visibleScheduleBatches}
             onSelectEvent={(eventId) => {
               setSelectedEventId(eventId);
               setSelectedTaskId(undefined);

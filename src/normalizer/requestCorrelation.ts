@@ -194,6 +194,7 @@ export function correlateRequests(events: ParsedEvent[]): {
         lifecycleEvents,
         relatedPrefixCacheEventIds: [...builder.relatedPrefixCacheEventIds],
         relatedUCTaskIds: [...builder.relatedUCTaskIds],
+        relatedScheduleBatchIds: [],
         anomalies: [],
         unmatchedEvents: [...builder.unmatchedEvents],
         totalDurationMs: start !== undefined && end !== undefined ? end - start : undefined,

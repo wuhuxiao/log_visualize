@@ -4,6 +4,7 @@ import { buildProcessSummaries } from "../aggregations/processSummary";
 import { parseSources } from "../parser";
 import { correlatePrefixCache } from "./prefixAssociation";
 import { correlateRequests } from "./requestCorrelation";
+import { correlateScheduleBatches } from "./scheduleBatches";
 import { correlateUCTasks } from "./ucTaskCorrelation";
 
 export function analyzeSources(sources: LogSource[]): AnalysisResult {
@@ -11,6 +12,7 @@ export function analyzeSources(sources: LogSource[]): AnalysisResult {
   const { requests } = correlateRequests(events);
   const prefixAssociations = correlatePrefixCache(events, requests);
   const ucTasks = correlateUCTasks(events, requests);
+  const scheduleBatches = correlateScheduleBatches(events, requests, ucTasks);
   const processSummaries = buildProcessSummaries(ucTasks);
   const anomalies = detectAnomalies(events, requests, ucTasks);
 
@@ -21,6 +23,7 @@ export function analyzeSources(sources: LogSource[]): AnalysisResult {
     requests,
     ucTasks,
     processSummaries,
+    scheduleBatches,
     anomalies,
     unmatchedEvents: events.filter((event) => event.unmatched),
     prefixAssociations

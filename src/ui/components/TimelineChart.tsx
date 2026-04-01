@@ -157,7 +157,7 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
   }
 
   return (
-    <div className="timeline-shell">
+    <div ref={containerRef} className="timeline-shell">
       <div className="timeline-header">
         <div className="timeline-title">{title}</div>
         <div className="timeline-controls">

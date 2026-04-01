@@ -7,14 +7,13 @@ interface SidebarFiltersProps {
   workerIds: string[];
   pids: number[];
   dpRanks: number[];
+  availableEventTypes: EventType[];
   sources: LogSource[];
   onFiltersChange: (filters: FilterState) => void;
   onFilesSelected: (files: FileList | null) => void;
   onLoadSample: (sampleIds: string[]) => void;
   onExportJson: () => void;
 }
-
-const eventTypes: EventType[] = ["request", "scheduler", "uc_task", "prefix_cache", "status", "unknown"];
 
 function toggleValue<T extends string | number>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
@@ -25,6 +24,7 @@ export function SidebarFilters({
   workerIds,
   pids,
   dpRanks,
+  availableEventTypes,
   sources,
   onFiltersChange,
   onFilesSelected,
@@ -35,6 +35,14 @@ export function SidebarFilters({
     onFilesSelected(event.target.files);
     event.target.value = "";
   };
+
+  const distinctWorkers = workerIds.filter((workerId) => {
+    const match = workerId.match(/^pid:(\d+)$/);
+    if (!match?.[1]) {
+      return true;
+    }
+    return !pids.includes(Number(match[1]));
+  });
 
   return (
     <aside className="sidebar">
@@ -87,18 +95,23 @@ export function SidebarFilters({
 
       <section className="panel-section">
         <h2>Worker / PID</h2>
-        <div className="check-grid">
-          {workerIds.map((workerId) => (
-            <label key={workerId} className="checkbox-row">
-              <input
-                type="checkbox"
-                checked={filters.workerIds.includes(workerId)}
-                onChange={() => onFiltersChange({ ...filters, workerIds: toggleValue(filters.workerIds, workerId) })}
-              />
-              {workerId}
-            </label>
-          ))}
-        </div>
+        {distinctWorkers.length > 0 ? (
+          <div className="check-grid">
+            {distinctWorkers.map((workerId) => (
+              <label key={workerId} className="checkbox-row">
+                <input
+                  type="checkbox"
+                  checked={filters.workerIds.includes(workerId)}
+                  onChange={() => onFiltersChange({ ...filters, workerIds: toggleValue(filters.workerIds, workerId) })}
+                />
+                {workerId}
+              </label>
+            ))}
+          </div>
+        ) : (
+          <div className="detail-muted">当前日志里没有独立的 worker 字段，使用下面的 PID 过滤即可。</div>
+        )}
+
         <div className="check-grid compact">
           {pids.map((pid) => (
             <label key={pid} className="checkbox-row">
@@ -128,7 +141,7 @@ export function SidebarFilters({
           ))}
         </div>
         <div className="check-grid">
-          {eventTypes.map((eventType) => (
+          {availableEventTypes.map((eventType) => (
             <label key={eventType} className="checkbox-row">
               <input
                 type="checkbox"

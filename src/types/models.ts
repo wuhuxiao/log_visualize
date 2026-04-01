@@ -142,6 +142,7 @@ export interface NormalizedRequest {
   lifecycleEvents: RequestLifecycleEvent[];
   relatedPrefixCacheEventIds: string[];
   relatedUCTaskIds: string[];
+  relatedScheduleBatchIds: string[];
   anomalies: AnomalyRecord[];
   unmatchedEvents: string[];
   totalDurationMs?: number;
@@ -207,6 +208,22 @@ export interface PrefixCacheAssociation {
   confidence: CorrelationConfidence;
 }
 
+export interface ScheduleBatch {
+  id: string;
+  schedulingRound?: number;
+  startMs?: number;
+  endMs?: number;
+  workerIds: string[];
+  pids: number[];
+  dpRanks: number[];
+  schedulingEventIds: string[];
+  responseEventIds: string[];
+  requestIds: string[];
+  lookupTaskIds: string[];
+  lookupCount: number;
+  lookupTotalMs: number;
+}
+
 export interface AnalysisResult {
   sources: LogSource[];
   rawLines: RawLogLine[];
@@ -214,6 +231,7 @@ export interface AnalysisResult {
   requests: NormalizedRequest[];
   ucTasks: NormalizedUCTask[];
   processSummaries: ProcessTaskSummary[];
+  scheduleBatches: ScheduleBatch[];
   anomalies: AnomalyRecord[];
   unmatchedEvents: ParsedEvent[];
   prefixAssociations: PrefixCacheAssociation[];
