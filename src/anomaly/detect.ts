@@ -10,7 +10,7 @@ import type {
 const SLOW_SCHEDULER_THRESHOLD_MS = 1000;
 const CACHE_POSIX_GAP_RATIO = 2;
 const CACHE_POSIX_GAP_MS = 20;
-const REQUEST_ANOMALY_RATIO = 0.2;
+const REQUEST_ANOMALY_RATIO = 0.05;
 
 function uniqueTasks(taskIds: string[], taskMap: Map<string, NormalizedUCTask>) {
   return [...new Set(taskIds)]
@@ -265,8 +265,8 @@ export function detectAnomalies(
       id: `anomaly:${row.request.id}:low-cache-bandwidth`,
       type: "low_cache_bandwidth",
       severity: "warning",
-      title: "Cache load bandwidth is in the slowest 20%",
-      description: `aggregate cache load bandwidth ${row.bandwidthMBps.toFixed(2)} MB/s is in the lowest 20% of requests`,
+      title: "Cache load bandwidth is in the slowest 5%",
+      description: `aggregate cache load bandwidth ${row.bandwidthMBps.toFixed(2)} MB/s is in the lowest 5% of requests`,
       requestId: row.request.id,
       workerId: row.request.workerIds[0],
       timestampMs: row.request.stages.enteredAt ?? row.request.stages.addedAt,
@@ -311,8 +311,8 @@ export function detectAnomalies(
       id: `anomaly:${row.request.id}:slow-model-compute`,
       type: "slow_model_compute",
       severity: "warning",
-      title: "Model compute time is in the slowest 20%",
-      description: `model compute duration ${row.durationMs.toFixed(2)}ms is in the highest 20% of requests`,
+      title: "Model compute time is in the slowest 5%",
+      description: `model compute duration ${row.durationMs.toFixed(2)}ms is in the highest 5% of requests`,
       requestId: row.request.id,
       workerId: row.request.workerIds[0],
       timestampMs: row.computeStartAt,
