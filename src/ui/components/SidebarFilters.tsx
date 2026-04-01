@@ -15,16 +15,8 @@ interface SidebarFiltersProps {
   onExportJson: () => void;
 }
 
-function toggleValue<T extends string | number>(list: T[], value: T): T[] {
-  return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
-}
-
 export function SidebarFilters({
   filters,
-  workerIds,
-  pids,
-  dpRanks,
-  availableEventTypes,
   sources,
   onFiltersChange,
   onFilesSelected,
@@ -36,34 +28,26 @@ export function SidebarFilters({
     event.target.value = "";
   };
 
-  const distinctWorkers = workerIds.filter((workerId) => {
-    const match = workerId.match(/^pid:(\d+)$/);
-    if (!match?.[1]) {
-      return true;
-    }
-    return !pids.includes(Number(match[1]));
-  });
-
   return (
     <aside className="sidebar">
       <section className="panel-section">
-        <h2>数据源</h2>
+        <h2>Data</h2>
         <label className="file-input-label">
-          <span>上传日志</span>
+          <span>Upload logs</span>
           <input type="file" accept=".log,.txt" multiple onChange={onUpload} />
         </label>
         <div className="button-stack">
           <button type="button" onClick={() => onLoadSample(["demo"])}>
-            加载样例 demo
+            Load demo
           </button>
           <button type="button" onClick={() => onLoadSample(["demo", "mixed-workers"])}>
-            加载多文件样例
+            Load multi-file sample
           </button>
           <button type="button" onClick={() => onLoadSample(SAMPLE_LOGS.map((sample) => sample.id))}>
-            全部样例
+            Load all samples
           </button>
           <button type="button" onClick={onExportJson}>
-            导出归一化 JSON
+            Export normalized JSON
           </button>
         </div>
         <div className="source-list">
@@ -76,10 +60,10 @@ export function SidebarFilters({
       </section>
 
       <section className="panel-section">
-        <h2>过滤</h2>
+        <h2>Filters</h2>
         <input
           className="search-input"
-          placeholder="搜索 llmMgrReqId / EngineReqId / seqId"
+          placeholder="Search llmMgrReqId / EngineReqId / seqId"
           value={filters.searchText}
           onChange={(event) => onFiltersChange({ ...filters, searchText: event.target.value })}
         />
@@ -89,12 +73,12 @@ export function SidebarFilters({
             checked={filters.onlyAnomalies}
             onChange={(event) => onFiltersChange({ ...filters, onlyAnomalies: event.target.checked })}
           />
-          仅看异常
+          Only anomalous requests
         </label>
       </section>
 
       <section className="panel-section">
-        <h2>异常请求筛选</h2>
+        <h2>Custom Request Thresholds</h2>
         <label className="checkbox-row">
           <input
             type="checkbox"
@@ -109,11 +93,11 @@ export function SidebarFilters({
               })
             }
           />
-          启用自定义阈值
+          Enable threshold filtering
         </label>
         <div className="threshold-grid">
           <label className="threshold-field">
-            <span>Cache load 带宽 ≤ MB/s</span>
+            <span>Cache load bandwidth &lt;= MB/s</span>
             <input
               type="number"
               min="0"
@@ -132,7 +116,7 @@ export function SidebarFilters({
             />
           </label>
           <label className="threshold-field">
-            <span>Cache dump 带宽 ≤ MB/s</span>
+            <span>Cache dump bandwidth &lt;= MB/s</span>
             <input
               type="number"
               min="0"
@@ -151,7 +135,7 @@ export function SidebarFilters({
             />
           </label>
           <label className="threshold-field">
-            <span>Model compute ≥ ms</span>
+            <span>Model compute &gt;= ms</span>
             <input
               type="number"
               min="0"
@@ -169,69 +153,6 @@ export function SidebarFilters({
               }
             />
           </label>
-        </div>
-      </section>
-
-      <section className="panel-section">
-        <h2>Worker / PID</h2>
-        {distinctWorkers.length > 0 ? (
-          <div className="check-grid">
-            {distinctWorkers.map((workerId) => (
-              <label key={workerId} className="checkbox-row">
-                <input
-                  type="checkbox"
-                  checked={filters.workerIds.includes(workerId)}
-                  onChange={() => onFiltersChange({ ...filters, workerIds: toggleValue(filters.workerIds, workerId) })}
-                />
-                {workerId}
-              </label>
-            ))}
-          </div>
-        ) : (
-          <div className="detail-muted">当前日志里没有独立的 worker 字段，使用下面的 PID 过滤即可。</div>
-        )}
-
-        <div className="check-grid compact">
-          {pids.map((pid) => (
-            <label key={pid} className="checkbox-row">
-              <input
-                type="checkbox"
-                checked={filters.pids.includes(pid)}
-                onChange={() => onFiltersChange({ ...filters, pids: toggleValue(filters.pids, pid) })}
-              />
-              {pid}
-            </label>
-          ))}
-        </div>
-      </section>
-
-      <section className="panel-section">
-        <h2>DP Rank / 类型</h2>
-        <div className="check-grid compact">
-          {dpRanks.map((dpRank) => (
-            <label key={dpRank} className="checkbox-row">
-              <input
-                type="checkbox"
-                checked={filters.dpRanks.includes(dpRank)}
-                onChange={() => onFiltersChange({ ...filters, dpRanks: toggleValue(filters.dpRanks, dpRank) })}
-              />
-              rank {dpRank}
-            </label>
-          ))}
-        </div>
-        <div className="check-grid">
-          {availableEventTypes.map((eventType) => (
-            <label key={eventType} className="checkbox-row">
-              <input
-                type="checkbox"
-                checked={filters.eventTypes.includes(eventType)}
-                onChange={() =>
-                  onFiltersChange({ ...filters, eventTypes: toggleValue(filters.eventTypes, eventType) })
-                }
-              />
-              {eventType}
-            </label>
-          ))}
         </div>
       </section>
     </aside>

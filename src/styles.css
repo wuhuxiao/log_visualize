@@ -91,6 +91,11 @@ button:hover {
   font-size: 14px;
 }
 
+.zoom-control label {
+  display: grid;
+  gap: 6px;
+}
+
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));

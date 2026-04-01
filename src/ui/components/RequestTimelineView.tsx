@@ -1,5 +1,21 @@
 import { useMemo } from "react";
-import type { NormalizedRequest, NormalizedUCTask, ParsedEvent, ScheduleBatch, SchedulerEvent } from "../../types/models";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
+import type {
+  NormalizedRequest,
+  NormalizedUCTask,
+  ParsedEvent,
+  ScheduleBatch,
+  SchedulerEvent
+} from "../../types/models";
+import { formatDuration } from "../../utils/time";
 import { TimelineChart, type TimelineItem } from "./TimelineChart";
 
 interface RequestTimelineViewProps {
@@ -13,6 +29,17 @@ interface RequestTimelineViewProps {
   onSelectRequest: (requestId: string) => void;
 }
 
+interface RequestPhaseMetrics {
+  requestId: string;
+  requestLabel: string;
+  requestStart?: number;
+  queueWaitMs?: number;
+  lookupMs?: number;
+  cacheLoadMs?: number;
+  modelComputeMs?: number;
+  kvTransferFinishMs?: number;
+}
+
 const DETAIL_EXPAND_THRESHOLD = 40;
 const REQUEST_COLORS = {
   receive: "#1d4ed8",
@@ -21,11 +48,16 @@ const REQUEST_COLORS = {
   lookup: "#7c3aed",
   cacheLoad: "#14b8a6",
   modelCompute: "#ef4444",
-  prefill: "#22c55e",
-  kvTransfer: "#8b5cf6",
-  kvRelease: "#d97706",
-  end: "#64748b"
+  kvTransfer: "#8b5cf6"
 } as const;
+
+const phaseChartConfig: Array<{ key: keyof RequestPhaseMetrics; label: string; color: string }> = [
+  { key: "queueWaitMs", label: "Queue wait", color: REQUEST_COLORS.waiting },
+  { key: "lookupMs", label: "Store lookup", color: REQUEST_COLORS.lookup },
+  { key: "cacheLoadMs", label: "Cache load", color: REQUEST_COLORS.cacheLoad },
+  { key: "modelComputeMs", label: "Model compute", color: REQUEST_COLORS.modelCompute },
+  { key: "kvTransferFinishMs", label: "KV transfer / finish", color: REQUEST_COLORS.kvTransfer }
+];
 
 function requestLabel(request: NormalizedRequest) {
   return request.llmMgrReqId ?? request.engineReqId ?? request.seqId ?? request.id;
@@ -36,7 +68,12 @@ function requestStart(request: NormalizedRequest) {
 }
 
 function requestEnd(request: NormalizedRequest) {
-  return request.stages.endedAt ?? request.stages.releaseResponseAt ?? request.stages.kvReleaseAt ?? request.lifecycleEvents.at(-1)?.timestampMs;
+  return (
+    request.stages.endedAt ??
+    request.stages.releaseResponseAt ??
+    request.stages.kvReleaseAt ??
+    request.lifecycleEvents.at(-1)?.timestampMs
+  );
 }
 
 function taskStart(task: NormalizedUCTask) {
@@ -52,16 +89,6 @@ function bandwidthMBps(task: NormalizedUCTask) {
     return undefined;
   }
   return task.bytes / 1024 / 1024 / (task.costMs / 1000);
-}
-
-function formatBandwidth(value?: number) {
-  if (value === undefined || Number.isNaN(value)) {
-    return undefined;
-  }
-  if (value >= 1000) {
-    return `${value.toFixed(0)} MB/s`;
-  }
-  return `${value.toFixed(1)} MB/s`;
 }
 
 function summarizeTaskGroup(tasks: NormalizedUCTask[]) {
@@ -110,6 +137,29 @@ function summarizeTaskGroup(tasks: NormalizedUCTask[]) {
   };
 }
 
+function getLatestSchedulingTime(
+  request: NormalizedRequest,
+  batch: ScheduleBatch,
+  schedulingEventById: Map<string, SchedulerEvent>
+) {
+  const matchedSchedulingEvents = batch.schedulingEventIds
+    .map((eventId) => schedulingEventById.get(eventId))
+    .filter((event): event is SchedulerEvent => event !== undefined);
+
+  const rankMatchedSchedulingEvents = matchedSchedulingEvents.filter(
+    (event) => request.dpRank === undefined || event.requestRef?.dpRank === request.dpRank
+  );
+
+  return (rankMatchedSchedulingEvents.length > 0 ? rankMatchedSchedulingEvents : matchedSchedulingEvents).reduce<
+    number | undefined
+  >((max, event) => {
+    if (event.timestampMs === undefined) {
+      return max;
+    }
+    return max === undefined ? event.timestampMs : Math.max(max, event.timestampMs);
+  }, undefined);
+}
+
 export function RequestTimelineView({
   requests,
   scheduleBatches,
@@ -120,8 +170,9 @@ export function RequestTimelineView({
   selectedRequestId,
   onSelectRequest
 }: RequestTimelineViewProps) {
-  const items = useMemo<TimelineItem[]>(() => {
+  const { items, phaseMetrics } = useMemo(() => {
     const nextItems: TimelineItem[] = [];
+    const nextPhaseMetrics: RequestPhaseMetrics[] = [];
     const batchById = new Map(scheduleBatches.map((batch) => [batch.id, batch]));
     const taskById = new Map(tasks.map((task) => [task.id, task]));
     const schedulingEventById = new Map(
@@ -147,6 +198,16 @@ export function RequestTimelineView({
         .sort((left, right) => (left.startMs ?? Number.MAX_SAFE_INTEGER) - (right.startMs ?? Number.MAX_SAFE_INTEGER));
       const isSelected = request.id === selectedRequestId;
       let waitingCursor = requestEnteredAt;
+
+      const metrics: RequestPhaseMetrics = {
+        requestId: request.id,
+        requestLabel: label,
+        requestStart: requestEnteredAt,
+        queueWaitMs: 0,
+        lookupMs: 0,
+        cacheLoadMs: 0,
+        modelComputeMs: 0
+      };
 
       if (requestEnteredAt !== undefined) {
         nextItems.push({
@@ -181,8 +242,7 @@ export function RequestTimelineView({
           selected: isSelected,
           meta: {
             requestId: label,
-            totalMs: requestFinishedAt - requestEnteredAt,
-            dpRank: request.dpRank ?? null
+            totalMs: requestFinishedAt - requestEnteredAt
           },
           anomaly: request.anomalies.length > 0
         });
@@ -190,25 +250,11 @@ export function RequestTimelineView({
 
       for (const [batchIndex, batch] of batches.entries()) {
         const batchKey = `${request.id}:${batch.id}`;
-        const matchedSchedulingEvents = batch.schedulingEventIds
-          .map((eventId) => schedulingEventById.get(eventId))
-          .filter((event): event is SchedulerEvent => event !== undefined);
-        const rankMatchedSchedulingEvents = matchedSchedulingEvents.filter(
-          (event) => request.dpRank === undefined || event.requestRef?.dpRank === request.dpRank
-        );
-        const scheduleAt =
-          (rankMatchedSchedulingEvents.length > 0 ? rankMatchedSchedulingEvents : matchedSchedulingEvents).reduce<number | undefined>(
-            (max, event) => {
-              if (event.timestampMs === undefined) {
-                return max;
-              }
-              return max === undefined ? event.timestampMs : Math.max(max, event.timestampMs);
-            },
-            undefined
-          ) ?? batch.startMs;
+        const scheduleAt = getLatestSchedulingTime(request, batch, schedulingEventById) ?? batch.startMs;
         const reporterAt = batch.reporterMs ?? batch.executionEndMs;
         const batchEndAt = batch.endMs ?? reporterAt;
-        const lookupEndAt = batch.lookupEndMs ?? batch.lookupStartMs;
+        const lookupStartAt = batch.lookupStartMs;
+        const lookupEndAt = batch.lookupEndMs ?? lookupStartAt;
         const relatedLoadTasks = [...batch.cacheLoadTaskIds, ...batch.posixLoadTaskIds]
           .map((taskId) => taskById.get(taskId))
           .filter((task): task is NormalizedUCTask => task !== undefined);
@@ -219,25 +265,22 @@ export function RequestTimelineView({
           }
           return max === undefined ? currentEnd : Math.max(max, currentEnd);
         }, undefined);
-        const loadStartAt =
-          [lookupEndAt, scheduleAt]
-            .filter((value): value is number => value !== undefined)
-            .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined);
-        const computeStartAt =
-          [scheduleAt, latestLoadFinishAt]
-            .filter((value): value is number => value !== undefined)
-            .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined) ??
-          batch.computeStartMs ??
-          lookupEndAt ??
-          scheduleAt;
+        const loadStartAt = [lookupEndAt, scheduleAt]
+          .filter((value): value is number => value !== undefined)
+          .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined);
+        const computeStartAt = [scheduleAt, latestLoadFinishAt]
+          .filter((value): value is number => value !== undefined)
+          .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined);
         const computeEndAt = request.stages.prefillCompleteAt ?? reporterAt;
-        const kvTransferEndAt =
+        const kvStageEndAt =
+          requestFinishedAt ??
           request.stages.controlRequestAt ??
           request.stages.releaseResponseAt ??
-          request.stages.kvReleaseAt ??
-          requestFinishedAt;
+          request.stages.kvReleaseAt;
 
         if (waitingCursor !== undefined && scheduleAt !== undefined && scheduleAt > waitingCursor) {
+          const waitMs = scheduleAt - waitingCursor;
+          metrics.queueWaitMs = (metrics.queueWaitMs ?? 0) + waitMs;
           nextItems.push({
             id: `request:${batchKey}:waiting`,
             lane: mainLane,
@@ -251,8 +294,7 @@ export function RequestTimelineView({
             meta: {
               requestId: label,
               batchId: batch.id,
-              waitMs: scheduleAt - waitingCursor,
-              dpRanks: batch.dpRanks.join(",") || null
+              waitMs
             },
             anomaly: request.anomalies.length > 0
           });
@@ -272,19 +314,20 @@ export function RequestTimelineView({
             meta: {
               requestId: label,
               batchId: batch.id,
-              schedulingRound: batch.schedulingRound ?? null,
-              workerCount: batch.workerIds.length
+              schedulingRound: batch.schedulingRound ?? null
             }
           });
         }
 
-        if (scheduleAt !== undefined && batch.lookupStartMs !== undefined && batch.lookupEndMs !== undefined) {
+        if (lookupStartAt !== undefined && lookupEndAt !== undefined) {
+          const lookupMs = lookupEndAt - lookupStartAt;
+          metrics.lookupMs = (metrics.lookupMs ?? 0) + lookupMs;
           nextItems.push({
             id: `request:${batchKey}:lookup-main`,
             lane: mainLane,
             label: "Store lookup",
-            start: batch.lookupStartMs,
-            end: batch.lookupEndMs,
+            start: lookupStartAt,
+            end: lookupEndAt,
             color: REQUEST_COLORS.lookup,
             legendKey: "request-store-lookup",
             legendLabel: "Store lookup",
@@ -293,15 +336,14 @@ export function RequestTimelineView({
               requestId: label,
               batchId: batch.id,
               lookupCount: batch.lookupCount,
-              lookupTotalMs: batch.lookupTotalMs,
-              lookupP50Ms: batch.lookupP50Ms ?? null,
-              lookupP90Ms: batch.lookupP90Ms ?? null,
-              lookupMaxMs: batch.lookupMaxMs ?? null
+              lookupTotalMs: batch.lookupTotalMs
             }
           });
         }
 
         if (loadStartAt !== undefined && computeStartAt !== undefined && computeStartAt > loadStartAt) {
+          const cacheLoadMs = computeStartAt - loadStartAt;
+          metrics.cacheLoadMs = (metrics.cacheLoadMs ?? 0) + cacheLoadMs;
           nextItems.push({
             id: `request:${batchKey}:load-main`,
             lane: mainLane,
@@ -322,6 +364,8 @@ export function RequestTimelineView({
         }
 
         if (computeStartAt !== undefined && computeEndAt !== undefined && computeEndAt >= computeStartAt) {
+          const modelComputeMs = computeEndAt - computeStartAt;
+          metrics.modelComputeMs = (metrics.modelComputeMs ?? 0) + modelComputeMs;
           nextItems.push({
             id: `request:${batchKey}:compute`,
             lane: mainLane,
@@ -335,109 +379,52 @@ export function RequestTimelineView({
             meta: {
               requestId: label,
               batchId: batch.id,
-              scheduleAt: scheduleAt ?? null,
-              latestLoadFinishAt: latestLoadFinishAt ?? null,
-              computeMs: computeEndAt - computeStartAt
-            }
-          });
-        }
-
-        if (request.stages.prefillCompleteAt !== undefined && batchIndex === batches.length - 1) {
-          nextItems.push({
-            id: `request:${batchKey}:prefill`,
-            lane: mainLane,
-            label: "Prefill done",
-            start: request.stages.prefillCompleteAt,
-            end: request.stages.prefillCompleteAt + 1,
-            color: REQUEST_COLORS.prefill,
-            legendKey: "request-prefill-complete",
-            legendLabel: "Prefill complete",
-            selected: isSelected,
-            meta: {
-              requestId: label,
-              batchId: batch.id
+              computeMs: modelComputeMs
             }
           });
         }
 
         if (
           request.stages.prefillCompleteAt !== undefined &&
-          kvTransferEndAt !== undefined &&
-          kvTransferEndAt > request.stages.prefillCompleteAt &&
+          kvStageEndAt !== undefined &&
+          kvStageEndAt > request.stages.prefillCompleteAt &&
           batchIndex === batches.length - 1
         ) {
+          const kvTransferFinishMs = kvStageEndAt - request.stages.prefillCompleteAt;
+          metrics.kvTransferFinishMs = kvTransferFinishMs;
           nextItems.push({
-            id: `request:${batchKey}:kv-transfer`,
+            id: `request:${batchKey}:kv-transfer-finish`,
             lane: mainLane,
-            label: "KV transfer / release",
+            label: "KV transfer / finish",
             start: request.stages.prefillCompleteAt,
-            end: kvTransferEndAt,
+            end: kvStageEndAt,
             color: REQUEST_COLORS.kvTransfer,
-            legendKey: "request-kv-transfer",
-            legendLabel: "KV transfer / release",
+            legendKey: "request-kv-transfer-finish",
+            legendLabel: "KV transfer / finish",
             selected: isSelected,
             meta: {
               requestId: label,
               batchId: batch.id,
               prefillCompleteAt: request.stages.prefillCompleteAt,
-              controlRequestAt: request.stages.controlRequestAt ?? null,
-              releaseResponseAt: request.stages.releaseResponseAt ?? null,
-              kvReleaseAt: request.stages.kvReleaseAt ?? null,
-              durationMs: kvTransferEndAt - request.stages.prefillCompleteAt
-            }
-          });
-        }
-
-        if (request.stages.kvReleaseAt !== undefined && batchIndex === batches.length - 1) {
-          nextItems.push({
-            id: `request:${batchKey}:kv-release`,
-            lane: mainLane,
-            label: "Release KV",
-            start: request.stages.kvReleaseAt,
-            end: request.stages.kvReleaseAt + 1,
-            color: REQUEST_COLORS.kvRelease,
-            legendKey: "request-kv-release",
-            legendLabel: "KV release",
-            selected: isSelected,
-            meta: {
-              requestId: label,
-              batchId: batch.id
-            }
-          });
-        }
-
-        if (requestFinishedAt !== undefined && batchIndex === batches.length - 1) {
-          nextItems.push({
-            id: `request:${batchKey}:end`,
-            lane: mainLane,
-            label: "Finished",
-            start: requestFinishedAt,
-            end: requestFinishedAt + 1,
-            color: REQUEST_COLORS.end,
-            legendKey: "request-finished",
-            legendLabel: "Request finished",
-            selected: isSelected,
-            meta: {
-              requestId: label,
-              batchId: batch.id,
-              status: request.status
+              finishedAt: kvStageEndAt,
+              durationMs: kvTransferFinishMs
             },
             anomaly: request.anomalies.length > 0
           });
         }
 
         if (!detailedRequestIds.has(request.id)) {
+          waitingCursor = batchEndAt ?? reporterAt ?? waitingCursor;
           continue;
         }
 
-        const batchLookupLane = `${mainLane} / Batch ${batchIndex + 1} lookup`;
-        if (batch.lookupStartMs !== undefined && batch.lookupEndMs !== undefined) {
+        if (lookupStartAt !== undefined && lookupEndAt !== undefined) {
           nextItems.push({
             id: `request:${batchKey}:lookup-detail`,
-            lane: batchLookupLane,
+            lane: `${mainLane} / Batch ${batchIndex + 1} lookup`,
             label: `Lookup x${batch.lookupCount}`,
-            start: batch.lookupStartMs,
-            end: batch.lookupEndMs,
+            start: lookupStartAt,
+            end: lookupEndAt,
             color: REQUEST_COLORS.lookup,
             legendKey: "batch-lookup-aggregate",
             legendLabel: "Batch lookup aggregate",
@@ -455,11 +442,7 @@ export function RequestTimelineView({
         }
 
         const taskGroups = new Map<string, { label: string; color: string; tasks: NormalizedUCTask[] }>();
-        const registerGroup = (
-          taskIds: string[],
-          categoryLabel: string,
-          color: string
-        ) => {
+        const registerGroup = (taskIds: string[], categoryLabel: string, color: string) => {
           for (const taskId of taskIds) {
             const task = taskById.get(taskId);
             if (!task) {
@@ -490,10 +473,9 @@ export function RequestTimelineView({
           if (summary.start === undefined || summary.end === undefined) {
             continue;
           }
-          const lane = `${mainLane} / ${firstTask.workerId} ${group.label}`;
           nextItems.push({
             id: `request:${batchKey}:${groupKey}`,
-            lane,
+            lane: `${mainLane} / ${firstTask.workerId} ${group.label}`,
             label: `${group.label} x${group.tasks.length}`,
             start: summary.start,
             end: summary.end,
@@ -515,51 +497,75 @@ export function RequestTimelineView({
           });
         }
 
-        if (batchEndAt !== undefined && batchEndAt > (reporterAt ?? batch.startMs ?? batchEndAt)) {
-          nextItems.push({
-            id: `request:${batchKey}:post`,
-            lane: `${mainLane} / Batch ${batchIndex + 1} completion`,
-            label: "Release / dump",
-            start: reporterAt ?? batch.startMs,
-            end: batchEndAt,
-            color: "#475569",
-            legendKey: "batch-release-dump",
-            legendLabel: "Release / dump",
-            selected: isSelected,
-            meta: {
-              requestId: label,
-              batchId: batch.id,
-              cacheDumpTotalMs: batch.cacheDumpTotalMs,
-              posixDumpTotalMs: batch.posixDumpTotalMs
-            }
-          });
-        }
-
         waitingCursor = batchEndAt ?? reporterAt ?? waitingCursor;
       }
+
+      nextPhaseMetrics.push(metrics);
     }
 
-    return nextItems;
+    return { items: nextItems, phaseMetrics: nextPhaseMetrics };
   }, [requests, scheduleBatches, tasks, events, selectedRequestId]);
+
+  const orderedPhaseMetrics = useMemo(
+    () =>
+      [...phaseMetrics].sort(
+        (left, right) => (left.requestStart ?? Number.MAX_SAFE_INTEGER) - (right.requestStart ?? Number.MAX_SAFE_INTEGER)
+      ),
+    [phaseMetrics]
+  );
 
   if (items.length === 0) {
     return <div className="empty-state">No request timeline data is available for the current filters.</div>;
   }
 
   return (
-    <TimelineChart
-      title="Request + Scheduling Execution Timeline"
-      items={items}
-      initialZoom={initialZoom}
-      keyboardPanStepMs={keyboardPanStepMs}
-      onItemClick={(itemId) => {
-        if (itemId.startsWith("request:")) {
-          const requestId = itemId.split(":")[1];
-          if (requestId) {
-            onSelectRequest(requestId);
+    <div className="view-grid">
+      <TimelineChart
+        title="Request + Scheduling Execution Timeline"
+        items={items}
+        initialZoom={initialZoom}
+        keyboardPanStepMs={keyboardPanStepMs}
+        onItemClick={(itemId) => {
+          if (itemId.startsWith("request:")) {
+            const requestId = itemId.split(":")[1];
+            if (requestId) {
+              onSelectRequest(requestId);
+            }
           }
+        }}
+      />
+
+      {phaseChartConfig.map((phase) => {
+        const data = orderedPhaseMetrics
+          .filter((item) => typeof item[phase.key] === "number")
+          .map((item) => ({
+            requestId: item.requestId,
+            requestLabel: item.requestLabel,
+            durationMs: Number(item[phase.key] ?? 0)
+          }));
+
+        if (data.length === 0) {
+          return null;
         }
-      }}
-    />
+
+        return (
+          <div key={phase.key} className="chart-panel">
+            <h3>{phase.label} duration by request order</h3>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                <XAxis dataKey="requestLabel" stroke="#94a3b8" minTickGap={24} />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip
+                  formatter={(value: number) => formatDuration(value)}
+                  contentStyle={{ background: "#101827", border: "1px solid #334155" }}
+                />
+                <Bar dataKey="durationMs" fill={phase.color} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        );
+      })}
+    </div>
   );
 }
