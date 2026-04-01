@@ -15,6 +15,7 @@ import type {
   ScheduleBatch,
   SchedulerEvent
 } from "../../types/models";
+import { hasDisplayTaskAnomaly } from "../anomalyDisplay";
 import {
   deriveRequestTimeline,
   taskEnd,
@@ -149,8 +150,7 @@ export function RequestTimelineView({
             requestId: label,
             phase: "received",
             dpRank: request.dpRank ?? null
-          },
-          anomaly: request.anomalies.length > 0
+          }
         });
       }
 
@@ -168,13 +168,14 @@ export function RequestTimelineView({
           meta: {
             requestId: label,
             totalMs: requestFinishedAt - requestEnteredAt
-          },
-          anomaly: request.anomalies.length > 0
+          }
         });
       }
 
       for (const [batchIndex, { batch, scheduleAt, taskGroups }] of batches.entries()) {
         const batchKey = `${request.id}:${batch.id}`;
+        const hasLoadTaskAnomaly = taskGroups.cacheLoadTasks.some(hasDisplayTaskAnomaly);
+        const hasDumpTaskAnomaly = taskGroups.cacheDumpTasks.some(hasDisplayTaskAnomaly);
 
         if (scheduleAt !== undefined) {
           nextItems.push({
@@ -218,7 +219,9 @@ export function RequestTimelineView({
             legendLabel: phase.label,
             selected: isSelected,
             meta: phase.meta,
-            anomaly: request.anomalies.length > 0
+            anomaly:
+              (phase.key === "cacheLoad" && hasLoadTaskAnomaly) ||
+              (phase.key === "cacheDump" && hasDumpTaskAnomaly)
           });
         }
 
@@ -299,7 +302,8 @@ export function RequestTimelineView({
               bytes: summary.bytes || null,
               avgBandwidthMBps: summary.avgBandwidthMBps ?? null,
               maxBandwidthMBps: summary.maxBandwidthMBps ?? null
-            }
+            },
+            anomaly: group.tasks.some(hasDisplayTaskAnomaly)
           });
         }
       }

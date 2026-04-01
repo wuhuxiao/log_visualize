@@ -1,4 +1,5 @@
 import type { NormalizedRequest, NormalizedUCTask, ParsedEvent } from "../../types/models";
+import { hasDisplayRequestAnomaly } from "../anomalyDisplay";
 import { formatDuration } from "../../utils/time";
 
 interface OverviewCardsProps {
@@ -16,15 +17,19 @@ export function OverviewCards({ requests, tasks, events }: OverviewCardsProps) {
 
   const cards = [
     { label: "总请求数", value: requests.length.toString() },
-    { label: "异常请求数", value: requests.filter((request) => request.anomalies.length > 0).length.toString() },
+    { label: "异常请求数", value: requests.filter((request) => hasDisplayRequestAnomaly(request)).length.toString() },
     { label: "总 worker 数", value: new Set(tasks.map((task) => task.workerId)).size.toString() },
     {
       label: "Cache task 平均耗时",
-      value: formatDuration(cacheTaskCosts.length ? cacheTaskCosts.reduce((sum, value) => sum + value, 0) / cacheTaskCosts.length : undefined)
+      value: formatDuration(
+        cacheTaskCosts.length ? cacheTaskCosts.reduce((sum, value) => sum + value, 0) / cacheTaskCosts.length : undefined
+      )
     },
     {
       label: "Posix task 平均耗时",
-      value: formatDuration(posixTaskCosts.length ? posixTaskCosts.reduce((sum, value) => sum + value, 0) / posixTaskCosts.length : undefined)
+      value: formatDuration(
+        posixTaskCosts.length ? posixTaskCosts.reduce((sum, value) => sum + value, 0) / posixTaskCosts.length : undefined
+      )
     },
     {
       label: "最慢 response cost",

@@ -229,6 +229,13 @@ export function detectAnomalies(
       anomalies.push(anomaly);
       task.anomalies.push(anomaly);
       paired.anomalies.push(anomaly);
+      if (anomaly.requestId) {
+        const request = requestMap.get(anomaly.requestId);
+        if (request) {
+          request.anomalies.push(anomaly);
+          request.status = "anomalous";
+        }
+      }
     }
   });
 

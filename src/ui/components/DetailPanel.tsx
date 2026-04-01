@@ -7,6 +7,7 @@ import type {
   ParsedEvent,
   SchedulerEvent
 } from "../../types/models";
+import { filterDisplayAnomalies } from "../anomalyDisplay";
 import { bandwidthMBps, deriveRequestTimeline, taskEnd, taskStart } from "../requestTimeline";
 import { formatDuration, formatTimestamp } from "../../utils/time";
 
@@ -262,7 +263,7 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
         </div>
 
         <h3>Anomalies</h3>
-        {renderAnomalies(selectedRequest.anomalies)}
+        {renderAnomalies(filterDisplayAnomalies(selectedRequest.anomalies))}
       </aside>
     );
   }
@@ -299,7 +300,7 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
           </div>
         </div>
         <h3>Anomalies</h3>
-        {renderAnomalies(selectedTask.anomalies)}
+        {renderAnomalies(filterDisplayAnomalies(selectedTask.anomalies))}
       </aside>
     );
   }

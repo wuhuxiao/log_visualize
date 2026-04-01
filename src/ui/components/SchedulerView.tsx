@@ -11,6 +11,7 @@ import {
   YAxis
 } from "recharts";
 import type { NormalizedRequest, ParsedEvent, ScheduleBatch } from "../../types/models";
+import { hasDisplayRequestAnomaly } from "../anomalyDisplay";
 import { formatDuration, formatTimestamp } from "../../utils/time";
 
 interface SchedulerViewProps {
@@ -23,11 +24,7 @@ interface SchedulerViewProps {
 export function SchedulerView({ events, scheduleBatches, requests, onSelectEvent }: SchedulerViewProps) {
   const anomalousRequestIds = new Set(
     requests
-      .filter((request) =>
-        request.anomalies.some(
-          (anomaly) => anomaly.type === "low_cache_bandwidth" || anomaly.type === "slow_model_compute"
-        )
-      )
+      .filter((request) => hasDisplayRequestAnomaly(request))
       .map((request) => request.id)
   );
   const schedulerEvents = events.filter((event) => event.eventType === "scheduler");
@@ -57,7 +54,7 @@ export function SchedulerView({ events, scheduleBatches, requests, onSelectEvent
         anomaly:
           batchHasRequestAnomaly ||
           event.anomalyTags.includes("low_cache_bandwidth") ||
-          event.anomalyTags.includes("slow_model_compute")
+          event.anomalyTags.includes("cache_posix_gap")
       };
     });
 

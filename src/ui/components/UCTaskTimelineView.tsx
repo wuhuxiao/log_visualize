@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { NormalizedUCTask } from "../../types/models";
+import { hasDisplayTaskAnomaly } from "../anomalyDisplay";
 import { deriveAbstractUCTimelineSegments } from "../ucTimelineAbstraction";
 import { formatDuration } from "../../utils/time";
 import { TimelineChart, type TimelineItem } from "./TimelineChart";
@@ -83,7 +84,7 @@ export function UCTaskTimelineView({
           bandwidthMBps: bandwidth ?? null,
           pairedPosixTaskId: task.pairedPosixTaskId ?? null
         },
-        anomaly: task.anomalies.length > 0
+        anomaly: hasDisplayTaskAnomaly(task)
       };
     });
 

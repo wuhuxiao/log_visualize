@@ -7,6 +7,7 @@ import type {
   ScheduleBatch,
   SchedulerEvent
 } from "../types/models";
+import { hasDisplayRequestAnomaly, hasDisplayTaskAnomaly } from "./anomalyDisplay";
 
 export interface RequestMetricSnapshot {
   cacheLoadBandwidthMBps?: number;
@@ -44,7 +45,7 @@ function matchesCoreFilters(
   const pidOk = filters.pids.length === 0 || (pid !== undefined && filters.pids.includes(pid));
   const dpOk = filters.dpRanks.length === 0 || (dpRank !== undefined && filters.dpRanks.includes(dpRank));
   const eventOk = filters.eventTypes.length === 0 || filters.eventTypes.includes(eventType as never);
-  const anomalyOk = !filters.onlyAnomalies || anomalyTags.length > 0;
+  const anomalyOk = !filters.onlyAnomalies || anomalyTags.some((tag) => tag === "low_cache_bandwidth" || tag === "cache_posix_gap");
   return workerOk && pidOk && dpOk && eventOk && searchMatches && anomalyOk;
 }
 
@@ -216,9 +217,11 @@ export function filterRequests(
     const pidOk = filters.pids.length === 0 || request.pidSet.some((pid) => filters.pids.includes(pid));
     const dpOk = filters.dpRanks.length === 0 || (request.dpRank !== undefined && filters.dpRanks.includes(request.dpRank));
     const eventOk = filters.eventTypes.length === 0 || filters.eventTypes.includes("request");
-    const anomalyOk = !filters.onlyAnomalies || request.anomalies.length > 0;
+    const anomalyOk = !filters.onlyAnomalies || hasDisplayRequestAnomaly(request);
     const thresholdOk = matchesCustomRequestThresholds(requestMetrics.get(request.id), filters);
-    const hasVisibleEvent = request.lifecycleEvents.some((event) => visibleEventIds.has(event.id));
+    const hasVisibleEvent =
+      request.lifecycleEvents.some((event) => visibleEventIds.has(event.id)) ||
+      (filters.onlyAnomalies && hasDisplayRequestAnomaly(request));
     return workerOk && pidOk && dpOk && eventOk && anomalyOk && matchesIds && hasVisibleEvent && thresholdOk;
   });
 }
@@ -239,7 +242,7 @@ export function filterUCTasks(
     const workerOk = filters.workerIds.length === 0 || filters.workerIds.includes(task.workerId);
     const pidOk = filters.pids.length === 0 || (task.pid !== undefined && filters.pids.includes(task.pid));
     const eventOk = filters.eventTypes.length === 0 || filters.eventTypes.includes("uc_task");
-    const anomalyOk = !filters.onlyAnomalies || task.anomalies.length > 0;
+    const anomalyOk = !filters.onlyAnomalies || hasDisplayTaskAnomaly(task);
     return workerOk && pidOk && eventOk && anomalyOk && searchOk;
   });
 }

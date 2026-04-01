@@ -1,4 +1,5 @@
 import type { NormalizedRequest } from "../../types/models";
+import { filterDisplayAnomalies, hasDisplayRequestAnomaly } from "../anomalyDisplay";
 import { formatDuration, formatTimestamp } from "../../utils/time";
 
 interface RequestListViewProps {
@@ -32,7 +33,7 @@ export function RequestListView({ requests, selectedRequestId, onSelectRequest }
             <tr
               key={request.id}
               className={
-                request.id === selectedRequestId ? "selected-row" : request.anomalies.length ? "anomaly-row" : undefined
+                request.id === selectedRequestId ? "selected-row" : hasDisplayRequestAnomaly(request) ? "anomaly-row" : undefined
               }
               onClick={() => onSelectRequest(request.id)}
             >
@@ -46,7 +47,13 @@ export function RequestListView({ requests, selectedRequestId, onSelectRequest }
               <td>{formatTimestamp(request.stages.kvReleaseAt)}</td>
               <td>{formatTimestamp(request.stages.endedAt ?? request.stages.releaseResponseAt)}</td>
               <td>{formatDuration(request.totalDurationMs)}</td>
-              <td>{request.anomalies.length ? request.anomalies.map((anomaly) => anomaly.type).join(", ") : "-"}</td>
+              <td>
+                {filterDisplayAnomalies(request.anomalies).length
+                  ? filterDisplayAnomalies(request.anomalies)
+                      .map((anomaly) => anomaly.type)
+                      .join(", ")
+                  : "-"}
+              </td>
             </tr>
           ))}
         </tbody>
