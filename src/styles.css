@@ -420,6 +420,27 @@ button:hover {
   padding-right: 4px;
 }
 
+.detail-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.detail-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.detail-pagination-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .detail-card.anomaly {
   border-color: rgba(239, 68, 68, 0.45);
 }
