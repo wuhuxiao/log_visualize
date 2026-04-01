@@ -8,15 +8,34 @@ interface UCTaskTimelineViewProps {
   onSelectTask: (taskId: string) => void;
 }
 
+function bandwidthMBps(task: NormalizedUCTask) {
+  if (!task.bytes || !task.costMs || task.costMs <= 0) {
+    return undefined;
+  }
+  return task.bytes / 1024 / 1024 / (task.costMs / 1000);
+}
+
+function formatBandwidth(value?: number) {
+  if (value === undefined || Number.isNaN(value)) {
+    return undefined;
+  }
+  if (value >= 1000) {
+    return `${value.toFixed(0)} MB/s`;
+  }
+  return `${value.toFixed(1)} MB/s`;
+}
+
 export function UCTaskTimelineView({ tasks, initialZoom = 2, selectedTaskId, onSelectTask }: UCTaskTimelineViewProps) {
   const items: TimelineItem[] = tasks.map((task) => {
     const isDump = task.category === "Dump" || task.category === "Cache2Backend";
     const color = task.category === "Lookup" ? "#6366f1" : isDump ? "#b45309" : "#0f766e";
+    const bandwidth = formatBandwidth(bandwidthMBps(task));
+    const label = bandwidth ? `${task.category} ${task.taskId ?? ""} ${bandwidth}`.trim() : `${task.category} ${task.taskId ?? ""}`.trim();
 
     return {
       id: task.id,
       lane: `${task.workerId} / ${task.ucKind}`,
-      label: `${task.category} ${task.taskId ?? ""}`.trim(),
+      label,
       start: task.dispatchAt ?? task.startAt ?? task.finishAt,
       end: task.finishAt ?? task.startAt ?? task.dispatchAt,
       color,
@@ -34,6 +53,7 @@ export function UCTaskTimelineView({ tasks, initialZoom = 2, selectedTaskId, onS
         syncMs: task.syncMs ?? null,
         backMs: task.backMs ?? null,
         costMs: task.costMs ?? null,
+        bandwidthMBps: bandwidth ?? null,
         pairedPosixTaskId: task.pairedPosixTaskId ?? null
       },
       anomaly: task.anomalies.length > 0

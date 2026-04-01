@@ -187,6 +187,7 @@ export default function App() {
             requests={visibleRequests}
             scheduleBatches={visibleScheduleBatches}
             tasks={visibleTasks}
+            events={visibleEvents}
             initialZoom={timelineZoom}
             selectedRequestId={selectedRequestId}
             onSelectRequest={(requestId) => {

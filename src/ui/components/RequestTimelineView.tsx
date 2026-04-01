@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import type { NormalizedRequest, NormalizedUCTask, ScheduleBatch } from "../../types/models";
+import type { NormalizedRequest, NormalizedUCTask, ParsedEvent, ScheduleBatch, SchedulerEvent } from "../../types/models";
 import { TimelineChart, type TimelineItem } from "./TimelineChart";
 
 interface RequestTimelineViewProps {
   requests: NormalizedRequest[];
   scheduleBatches: ScheduleBatch[];
   tasks: NormalizedUCTask[];
+  events: ParsedEvent[];
   initialZoom?: number;
   selectedRequestId?: string;
   onSelectRequest: (requestId: string) => void;
@@ -20,6 +21,7 @@ const REQUEST_COLORS = {
   cacheLoad: "#14b8a6",
   modelCompute: "#ef4444",
   prefill: "#22c55e",
+  kvTransfer: "#8b5cf6",
   kvRelease: "#d97706",
   end: "#64748b"
 } as const;
@@ -49,6 +51,16 @@ function bandwidthMBps(task: NormalizedUCTask) {
     return undefined;
   }
   return task.bytes / 1024 / 1024 / (task.costMs / 1000);
+}
+
+function formatBandwidth(value?: number) {
+  if (value === undefined || Number.isNaN(value)) {
+    return undefined;
+  }
+  if (value >= 1000) {
+    return `${value.toFixed(0)} MB/s`;
+  }
+  return `${value.toFixed(1)} MB/s`;
 }
 
 function summarizeTaskGroup(tasks: NormalizedUCTask[]) {
@@ -101,6 +113,7 @@ export function RequestTimelineView({
   requests,
   scheduleBatches,
   tasks,
+  events,
   initialZoom = 2,
   selectedRequestId,
   onSelectRequest
@@ -109,6 +122,13 @@ export function RequestTimelineView({
     const nextItems: TimelineItem[] = [];
     const batchById = new Map(scheduleBatches.map((batch) => [batch.id, batch]));
     const taskById = new Map(tasks.map((task) => [task.id, task]));
+    const schedulingEventById = new Map(
+      events
+        .filter(
+          (event): event is SchedulerEvent => event.eventType === "scheduler" && event.eventName === "scheduler_scheduling"
+        )
+        .map((event) => [event.id, event])
+    );
     const showExpandedDetailsForAll = requests.length <= DETAIL_EXPAND_THRESHOLD;
     const detailedRequestIds = showExpandedDetailsForAll
       ? new Set(requests.map((request) => request.id))
@@ -168,11 +188,52 @@ export function RequestTimelineView({
 
       for (const [batchIndex, batch] of batches.entries()) {
         const batchKey = `${request.id}:${batch.id}`;
-        const scheduleAt = batch.startMs;
+        const matchedSchedulingEvents = batch.schedulingEventIds
+          .map((eventId) => schedulingEventById.get(eventId))
+          .filter((event): event is SchedulerEvent => event !== undefined);
+        const rankMatchedSchedulingEvents = matchedSchedulingEvents.filter(
+          (event) => request.dpRank === undefined || event.requestRef?.dpRank === request.dpRank
+        );
+        const scheduleAt =
+          (rankMatchedSchedulingEvents.length > 0 ? rankMatchedSchedulingEvents : matchedSchedulingEvents).reduce<number | undefined>(
+            (max, event) => {
+              if (event.timestampMs === undefined) {
+                return max;
+              }
+              return max === undefined ? event.timestampMs : Math.max(max, event.timestampMs);
+            },
+            undefined
+          ) ?? batch.startMs;
         const reporterAt = batch.reporterMs ?? batch.executionEndMs;
         const batchEndAt = batch.endMs ?? reporterAt;
         const lookupEndAt = batch.lookupEndMs ?? batch.lookupStartMs;
-        const computeStartAt = batch.computeStartMs ?? lookupEndAt ?? scheduleAt;
+        const relatedLoadTasks = [...batch.cacheLoadTaskIds, ...batch.posixLoadTaskIds]
+          .map((taskId) => taskById.get(taskId))
+          .filter((task): task is NormalizedUCTask => task !== undefined);
+        const latestLoadFinishAt = relatedLoadTasks.reduce<number | undefined>((max, task) => {
+          const currentEnd = taskEnd(task);
+          if (currentEnd === undefined) {
+            return max;
+          }
+          return max === undefined ? currentEnd : Math.max(max, currentEnd);
+        }, undefined);
+        const loadStartAt =
+          [lookupEndAt, scheduleAt]
+            .filter((value): value is number => value !== undefined)
+            .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined);
+        const computeStartAt =
+          [scheduleAt, latestLoadFinishAt]
+            .filter((value): value is number => value !== undefined)
+            .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined) ??
+          batch.computeStartMs ??
+          lookupEndAt ??
+          scheduleAt;
+        const computeEndAt = request.stages.prefillCompleteAt ?? reporterAt;
+        const kvTransferEndAt =
+          request.stages.controlRequestAt ??
+          request.stages.releaseResponseAt ??
+          request.stages.kvReleaseAt ??
+          requestFinishedAt;
 
         if (waitingCursor !== undefined && scheduleAt !== undefined && scheduleAt > waitingCursor) {
           nextItems.push({
@@ -238,12 +299,12 @@ export function RequestTimelineView({
           });
         }
 
-        if (lookupEndAt !== undefined && computeStartAt !== undefined && computeStartAt > lookupEndAt) {
+        if (loadStartAt !== undefined && computeStartAt !== undefined && computeStartAt > loadStartAt) {
           nextItems.push({
             id: `request:${batchKey}:load-main`,
             lane: mainLane,
             label: "Cache load",
-            start: lookupEndAt,
+            start: loadStartAt,
             end: computeStartAt,
             color: REQUEST_COLORS.cacheLoad,
             legendKey: "request-cache-load",
@@ -258,13 +319,13 @@ export function RequestTimelineView({
           });
         }
 
-        if (computeStartAt !== undefined && reporterAt !== undefined && reporterAt >= computeStartAt) {
+        if (computeStartAt !== undefined && computeEndAt !== undefined && computeEndAt >= computeStartAt) {
           nextItems.push({
             id: `request:${batchKey}:compute`,
             lane: mainLane,
             label: "Model compute",
             start: computeStartAt,
-            end: reporterAt,
+            end: computeEndAt,
             color: REQUEST_COLORS.modelCompute,
             legendKey: "request-model-compute",
             legendLabel: "Model compute",
@@ -272,7 +333,9 @@ export function RequestTimelineView({
             meta: {
               requestId: label,
               batchId: batch.id,
-              computeMs: reporterAt - computeStartAt
+              scheduleAt: scheduleAt ?? null,
+              latestLoadFinishAt: latestLoadFinishAt ?? null,
+              computeMs: computeEndAt - computeStartAt
             }
           });
         }
@@ -291,6 +354,34 @@ export function RequestTimelineView({
             meta: {
               requestId: label,
               batchId: batch.id
+            }
+          });
+        }
+
+        if (
+          request.stages.prefillCompleteAt !== undefined &&
+          kvTransferEndAt !== undefined &&
+          kvTransferEndAt > request.stages.prefillCompleteAt &&
+          batchIndex === batches.length - 1
+        ) {
+          nextItems.push({
+            id: `request:${batchKey}:kv-transfer`,
+            lane: mainLane,
+            label: "KV transfer / release",
+            start: request.stages.prefillCompleteAt,
+            end: kvTransferEndAt,
+            color: REQUEST_COLORS.kvTransfer,
+            legendKey: "request-kv-transfer",
+            legendLabel: "KV transfer / release",
+            selected: isSelected,
+            meta: {
+              requestId: label,
+              batchId: batch.id,
+              prefillCompleteAt: request.stages.prefillCompleteAt,
+              controlRequestAt: request.stages.controlRequestAt ?? null,
+              releaseResponseAt: request.stages.releaseResponseAt ?? null,
+              kvReleaseAt: request.stages.kvReleaseAt ?? null,
+              durationMs: kvTransferEndAt - request.stages.prefillCompleteAt
             }
           });
         }
@@ -447,7 +538,7 @@ export function RequestTimelineView({
     }
 
     return nextItems;
-  }, [requests, scheduleBatches, tasks, selectedRequestId]);
+  }, [requests, scheduleBatches, tasks, events, selectedRequestId]);
 
   if (items.length === 0) {
     return <div className="empty-state">No request timeline data is available for the current filters.</div>;
