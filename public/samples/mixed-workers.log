@@ -1,0 +1,30 @@
+[2026-03-31 17:02:10.000111] [901] [1101] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 20001
+[2026-03-31 17:02:10.000512] [901] [1101] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 0, Add request(llmMgrReqId: 20001/0, EngineReqId: eng-20001, seqId: 301) successfully. Total added request num is:1
+[2026-03-31 17:02:10.001002] [901] [1101] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 20001/0, EngineReqId: eng-20001
+[2026-03-31 17:02:10.003120] [901] [1102] [llm] [INFO] [scheduler.cpp:229] [Scheduler|Schedule-scheduling] DP RankId: 0. After Backfill, running size:1; waiting size: 1; swapped size:0; batch size:1; transferring size:1; schedule forwardMode:0; PD PriorityType:0
+[2026-03-31 17:02:10.004011][UC][D] Cache task(11,Load,32,262144000) dispatching. [1901,22001][trans_manager.h:58,Dispatch]
+[2026-03-31 17:02:10.004201][UC][D] Cache task(11) wait=0.110ms, mk_buf=1.020ms, back=0.004ms. [1901,22001][load_queue.cc:119,DispatchOneTask]
+[2026-03-31 17:02:10.004511][UC][D] Posix task(11,Backend2Cache,32,262144000) dispatching. [1901,22007][io_engine_psync.h:53,Dispatch]
+[2026-03-31 17:02:10.012845][UC][D] Posix load task(11) start running, wait 0.861ms. [1901,22008][trans_queue.cc:111,LoadWorker]
+[2026-03-31 17:02:10.025611][UC][D] Posix task(11,Backend2Cache,32,262144000) finished, cost 20.331ms. [1901,22007][io_engine_psync.h:56,operator()]
+[2026-03-31 17:02:10.061712][UC][D] Cache task(11,Load,32,262144000) finished, cost 57.701ms. [1901,22001][trans_manager.h:61,operator()]
+[2026-03-31 17:02:10,062] [1901] [281470442199168] [llm] [INFO] [prefix_cache_plugin.py-169] : Prefix Cache Reporter: #batchsize: 1, #batched-tokens: 8192, #local cached-tokens: 1024, #local cache hit rate: 12.5%, #remote cached-tokens: 2048, #remote cache hit rate: 25.0%, #cache hit rate: 37.5%
+[2026-03-31 17:02:10.065015] [901] [1104] [server] [INFO] [prefill_wrapper.cpp:194] [endpoint] Finish decode tokenIds. RequestId is 20001
+[2026-03-31 17:02:10.065091] [901] [1104] [llm] [INFO] [model_exec_output_handler.cpp:65] [LlmEngine|Request-Publish Complete] DP RankId: 0. Request Prefill Complete, llmMgrReqId:20001, seqId: 301, pInstanceId:0, localDPRank_:0
+[2026-03-31 17:02:10.080211] [901] [1105] [server] [INFO] [dmi_msg_receiver.cpp:99] [endpoint] Get kv release request, reqId is 20001
+[2026-03-31 17:02:10.080544] [901] [1106] [llm] [INFO] [llm_manager_impl.cpp:1762] Get a new ControlRequest from server, llmMgrReqId: 20001, EngineReqId: eng-20001, with operation:2
+[2026-03-31 17:02:10.080694] [901] [1106] [llm] [INFO] [llm_engine.cpp:236] [LlmEngine] DP RankId: 0. Send Release KV response(EngineReqId: eng-20001) successfully.
+[2026-03-31 17:02:10.080992] [901] [1106] [llm] [INFO] [llm_manager_impl.cpp:1888] Request life endup, llmMgrReqId: 20001, final status: success
+[2026-03-31 17:02:10.110111] [902] [1201] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 20002
+[2026-03-31 17:02:10.110612] [902] [1201] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 1, Add request(llmMgrReqId: 20002/1, EngineReqId: eng-20002, seqId: 401) successfully. Total added request num is:1
+[2026-03-31 17:02:10.111351] [902] [1202] [llm] [INFO] [scheduler.cpp:229] [Scheduler|Schedule-scheduling] DP RankId: 1. After Backfill, running size:0; waiting size: 2; swapped size:0; batch size:1; transferring size:2; schedule forwardMode:0; PD PriorityType:0
+[2026-03-31 17:02:10.113011][UC][D] Cache task(21,Dump,4,32768000) dispatching. [2901,32001][trans_manager.h:58,Dispatch]
+[2026-03-31 17:02:10.113242][UC][D] Cache task(21) start running, wait 0.081ms. [2901,32001][dump_queue.cc:83,DispatchOneTask]
+[2026-03-31 17:02:10.113428][UC][D] Posix task(21,Cache2Backend,4,32768000) dispatching. [2901,32009][io_engine_psync.h:53,Dispatch]
+[2026-03-31 17:02:10.113629][UC][D] Posix dump task(21) start running, wait 0.210ms. [2901,32019][trans_queue.cc:111,DumpWorker]
+[2026-03-31 17:02:10.114001][UC][D] Cache task(21) mk_buf=2.900ms, sync=35.100ms, back=0.100ms. [2901,32001][dump_queue.cc:139,DumpOneTask]
+[2026-03-31 17:02:10.114422][UC][D] Cache task(21,Dump,4,32768000) finished, cost 40.500ms. [2901,32001][trans_manager.h:61,operator()]
+[2026-03-31 17:02:10.121021][UC][D] Posix task(21,Cache2Backend,4,32768000) finished, cost 9.300ms. [2901,32009][io_engine_psync.h:56,operator()]
+[2026-03-31 17:02:10.125551] [902] [1203] [llm] [INFO] [llm_engine.cpp:478] [Scheduler|Schedule-Response] Response and schedule transfer cost too long. DP RankId:1, response cost:1880, ScheduleExecTransfer cost:0, scheduleCost:66, totalIterCost:1946, schedulingRound:101
+[2026-03-31 17:02:10.126017] [902] [1204] [llm] [INFO] [model_exec_output_handler.cpp:47] Can not find sequence group, seqId=401
+[2026-03-31 17:02:10,126] [2901] [281471270049920] [llm] [INFO] [prefix_cache_plugin.py-177] : Prefix Cache Global Reporter: #total prefill tokens: 8192, #total local matched tokens: 1024, #total local cached hit rate: 12.5%, #total remote matched tokens: 0, #total remote cached hit rate: 0.0%, #total cached hit rate: 12.5%

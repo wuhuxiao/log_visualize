@@ -1,0 +1,418 @@
+[2026-03-31 16:51:05.117394] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 18324423956197081082
+[2026-03-31 16:51:05.117852] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.117913] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 0, Add request(llmMgrReqId: 18324423956197081082/0, EngineReqId: 293db75c2470cf2ff799bf7538adfc73, seqId: 100) successfully. Total added request num is:1
+[2026-03-31 16:51:05.118110] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 18324423956197081082/0, EngineReqId: 293db75c2470cf2ff799bf7538adfc73
+[2026-03-31 16:51:05.118126] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 18324423956197081082, status: 1, type: 1
+[2026-03-31 16:51:05.118174] [548] [648] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 18324423956197081082
+[2026-03-31 16:51:05.125449][UC][D] Cache lookup(1) costs 0.029ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.128475][UC][D] Cache lookup(1/1) in backend costs 2.967ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.128721][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.129913][UC][D] Cache lookup(1/1) in backend costs 1.178ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.130130][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.130855][UC][D] Cache lookup(1/1) in backend costs 0.714ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.131078][UC][D] Cache lookup(1) costs 0.013ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.132300][UC][D] Cache lookup(1/1) in backend costs 1.211ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.132512][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.133235][UC][D] Cache lookup(1/1) in backend costs 0.712ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.133401][UC][D] Cache lookup(1) costs 0.020ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.134030][UC][D] Cache lookup(1/1) in backend costs 0.618ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.134202][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.134904][UC][D] Cache lookup(1/1) in backend costs 0.693ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.135076][UC][D] Cache lookup(1) costs 0.011ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.135880][UC][D] Cache lookup(1/1) in backend costs 0.794ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.136049][UC][D] Cache lookup(1) costs 0.020ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.136444][UC][D] Cache lookup(1/1) in backend costs 0.385ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.136594][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.137367][UC][D] Cache lookup(1/1) in backend costs 0.763ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.137505][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.137816][UC][D] Cache lookup(1/1) in backend costs 0.302ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.137975][UC][D] Cache lookup(1) costs 0.012ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.138608][UC][D] Cache lookup(1/1) in backend costs 0.622ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.138760][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.139235][UC][D] Cache lookup(1/1) in backend costs 0.465ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.139371][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.140146][UC][D] Cache lookup(1/1) in backend costs 0.766ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.140302][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.140852][UC][D] Cache lookup(1/1) in backend costs 0.540ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.140999][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.141497][UC][D] Cache lookup(1/1) in backend costs 0.489ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.141642][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.141882][UC][D] Cache lookup(1/1) in backend costs 0.230ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.142046][UC][D] Cache lookup(1) costs 0.012ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.142438][UC][D] Cache lookup(1/1) in backend costs 0.381ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.142610][UC][D] Cache lookup(1) costs 0.011ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.143338][UC][D] Cache lookup(1/1) in backend costs 0.718ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.143493][UC][D] Cache lookup(1) costs 0.013ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.143839][UC][D] Cache lookup(1/1) in backend costs 0.336ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.143993][UC][D] Cache lookup(1) costs 0.011ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.144442][UC][D] Cache lookup(1/1) in backend costs 0.440ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.144607][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.145309][UC][D] Cache lookup(1/1) in backend costs 0.693ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.145446][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.145938][UC][D] Cache lookup(1/1) in backend costs 0.483ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.146070][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.146762][UC][D] Cache lookup(1/1) in backend costs 0.683ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.146904][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.147467][UC][D] Cache lookup(1/1) in backend costs 0.554ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.147605][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.147841][UC][D] Cache lookup(1/1) in backend costs 0.227ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.147977][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.148412][UC][D] Cache lookup(1/1) in backend costs 0.425ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.148551][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.149210][UC][D] Cache lookup(1/1) in backend costs 0.650ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.149346][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.149649][UC][D] Cache lookup(1/1) in backend costs 0.294ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.149784][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.150374][UC][D] Cache lookup(1/1) in backend costs 0.581ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.150523][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.150875][UC][D] Cache lookup(1/1) in backend costs 0.343ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.151017][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.151380][UC][D] Cache lookup(1/1) in backend costs 0.354ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.151519][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.151909][UC][D] Cache lookup(1/1) in backend costs 0.381ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.152055][UC][D] Cache lookup(1) costs 0.013ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.152394][UC][D] Cache lookup(1/1) in backend costs 0.329ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.152539][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.153191][UC][D] Cache lookup(1/1) in backend costs 0.642ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.153329][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.153683][UC][D] Cache lookup(1/1) in backend costs 0.345ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.153818][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.154073][UC][D] Cache lookup(1/1) in backend costs 0.246ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.154212][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.154736][UC][D] Cache lookup(1/1) in backend costs 0.514ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.154904][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.155418][UC][D] Cache lookup(1/1) in backend costs 0.505ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.155554][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.156260][UC][D] Cache lookup(1/1) in backend costs 0.697ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.156408][UC][D] Cache lookup(1) costs 0.011ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.156907][UC][D] Cache lookup(1/1) in backend costs 0.489ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.157048][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.157718][UC][D] Cache lookup(1/1) in backend costs 0.661ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.157855][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.158334][UC][D] Cache lookup(1/1) in backend costs 0.469ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.158474][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.158865][UC][D] Cache lookup(1/1) in backend costs 0.382ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.159013][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.159561][UC][D] Cache lookup(1/1) in backend costs 0.539ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.159696][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.159957][UC][D] Cache lookup(1/1) in backend costs 0.253ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.160098][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.160640][UC][D] Cache lookup(1/1) in backend costs 0.533ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.160781][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.161315][UC][D] Cache lookup(1/1) in backend costs 0.525ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.161454][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.161994][UC][D] Cache lookup(1/1) in backend costs 0.532ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.162130][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.162632][UC][D] Cache lookup(1/1) in backend costs 0.494ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.162778][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.163095][UC][D] Cache lookup(1/1) in backend costs 0.307ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.163234][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.163998][UC][D] Cache lookup(1/1) in backend costs 0.756ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.164131][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.164772][UC][D] Cache lookup(1/1) in backend costs 0.632ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.164916][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.165433][UC][D] Cache lookup(1/1) in backend costs 0.508ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.165572][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.165943][UC][D] Cache lookup(1/1) in backend costs 0.362ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.166105][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.166780][UC][D] Cache lookup(1/1) in backend costs 0.667ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.166927][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.167278][UC][D] Cache lookup(1/1) in backend costs 0.341ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.167416][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.167989][UC][D] Cache lookup(1/1) in backend costs 0.565ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.168124][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.168463][UC][D] Cache lookup(1/1) in backend costs 0.331ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.168597][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.168833][UC][D] Cache lookup(1/1) in backend costs 0.227ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.168969][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.169700][UC][D] Cache lookup(1/1) in backend costs 0.723ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.169833][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.170435][UC][D] Cache lookup(1/1) in backend costs 0.593ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.170588][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.170894][UC][D] Cache lookup(1/1) in backend costs 0.295ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.171034][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.171571][UC][D] Cache lookup(1/1) in backend costs 0.529ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.171712][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:05.172263][UC][D] Cache lookup(1/1) in backend costs 0.543ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:05.172319] [548] [21935] [llm] [INFO] [scheduler.cpp:229] [Scheduler|Schedule-scheduling] DP RankId: 1. After Backfill, running size:0; waiting size: 0; swapped size:0; batch size:1; transferring size:1; schedule forwardMode:0; PD PriorityType:0
+[2026-03-31 16:51:05.186709][UC][D] Cache task(1,Load,64,585105408) dispatching. [12954,13255][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:05.187174][UC][D] Cache task(1,Load,64,585105408) dispatching. [12939,13235][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:05.187363][UC][D] Try to load (64) shards. [12954,21804][load_queue.cc:88,DispatchOneTask]
+[2026-03-31 16:51:05.187845][UC][D] Posix task(1,Backend2Cache,64,585105408) dispatching. [12954,21804][io_engine_psync.h:53,Dispatch]
+[2026-03-31 16:51:05.187911][UC][D] Cache task(1) wait=0.090ms, mk_buf=0.832ms, back=0.283ms. [12954,21804][load_queue.cc:119,DispatchOneTask]
+[2026-03-31 16:51:05.187976][UC][D] Try to load (64) shards. [12939,21752][load_queue.cc:88,DispatchOneTask]
+[2026-03-31 16:51:05.188060][UC][D] Cache task(1) wait=0.222ms, mk_buf=0.666ms, back=0.003ms. [12939,21752][load_queue.cc:119,DispatchOneTask]
+[2026-03-31 16:51:05.188357][UC][D] Cache task(1,Load,64,585105408) dispatching. [12965,13273][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:05.188573][UC][D] Posix load task(1) start running, wait 0.927ms. [12954,20435][trans_queue.cc:96,LoadWorker]
+[2026-03-31 16:51:05.189160][UC][D] Try to load (64) shards. [12965,21739][load_queue.cc:88,DispatchOneTask]
+[2026-03-31 16:51:05.189446][UC][D] Cache task(1) wait=0.092ms, mk_buf=0.994ms, back=0.005ms. [12965,21739][load_queue.cc:119,DispatchOneTask]
+[2026-03-31 16:51:05.189983][UC][D] Cache task(1,Load,64,585105408) dispatching. [12936,13194][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:05.190339][UC][D] Cache task(1,Load,64,585105408) dispatching. [12930,13168][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:05.190422][UC][D] Cache task(1,Load,64,585105408) dispatching. [12983,13284][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:05.191204][UC][D] Try to load (64) shards. [12983,21661][load_queue.cc:88,DispatchOneTask]
+[2026-03-31 16:51:05.191199][UC][D] Cache task(1,Load,64,585105408) dispatching. [12933,13205][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:05.191525][UC][D] Cache task(1) wait=0.181ms, mk_buf=0.916ms, back=0.003ms. [12983,21661][load_queue.cc:119,DispatchOneTask]
+[2026-03-31 16:51:05.192263][UC][D] Try to load (64) shards. [12930,21765][load_queue.cc:88,DispatchOneTask]
+[2026-03-31 16:51:05.192649][UC][D] Try to load (64) shards. [12936,21778][load_queue.cc:88,DispatchOneTask]
+[2026-03-31 16:51:05.192676][UC][D] Cache task(1) wait=0.151ms, mk_buf=2.185ms, back=0.005ms. [12930,21765][load_queue.cc:119,DispatchOneTask]
+[2026-03-31 16:51:05.193008][UC][D] Cache task(1) wait=0.176ms, mk_buf=2.843ms, back=0.005ms. [12936,21778][load_queue.cc:119,DispatchOneTask]
+[2026-03-31 16:51:05.194059][UC][D] Cache task(1,Load,64,585105408) dispatching. [12943,13183][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:05.194313][UC][D] Try to load (64) shards. [12933,21791][load_queue.cc:88,DispatchOneTask]
+[2026-03-31 16:51:05.194688][UC][D] Cache task(1) wait=0.106ms, mk_buf=3.384ms, back=0.005ms. [12933,21791][load_queue.cc:119,DispatchOneTask]
+[2026-03-31 16:51:05.196383][UC][D] Try to load (64) shards. [12943,21817][load_queue.cc:88,DispatchOneTask]
+[2026-03-31 16:51:05.196753][UC][D] Cache task(1) wait=0.272ms, mk_buf=2.422ms, back=0.003ms. [12943,21817][load_queue.cc:119,DispatchOneTask]
+[2026-03-31 16:51:05.206914] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 15594223928127412237
+[2026-03-31 16:51:05.207068] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.207116] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 1, Add request(llmMgrReqId: 15594223928127412237/0, EngineReqId: 73cdbc21f4a0ffa71ad06c15244cf4e1, seqId: 101) successfully. Total added request num is:1
+[2026-03-31 16:51:05.207127] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 15594223928127412237/0, EngineReqId: 73cdbc21f4a0ffa71ad06c15244cf4e1
+[2026-03-31 16:51:05.207137] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 15594223928127412237, status: 1, type: 1
+[2026-03-31 16:51:05.207179] [548] [664] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 15594223928127412237
+[2026-03-31 16:51:05.250148][UC][D] Posix task(1,Backend2Cache,64,585105408) finished, cost 62.502ms. [12954,20436][io_engine_psync.h:56,operator()]
+[2026-03-31 16:51:05.298785] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 10614993074038501122
+[2026-03-31 16:51:05.298953] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.298982] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 0, Add request(llmMgrReqId: 10614993074038501122/0, EngineReqId: 4cb05fc70f6353eec385d788b7328240, seqId: 102) successfully. Total added request num is:2
+[2026-03-31 16:51:05.298993] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 10614993074038501122/0, EngineReqId: 4cb05fc70f6353eec385d788b7328240
+[2026-03-31 16:51:05.299019] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 10614993074038501122, status: 1, type: 1
+[2026-03-31 16:51:05.299081] [548] [656] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 10614993074038501122
+[2026-03-31 16:51:05.389493] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 231210494199476474
+[2026-03-31 16:51:05.389645] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.389675] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 1, Add request(llmMgrReqId: 231210494199476474/0, EngineReqId: 2b9d524681bfdb732aba716c3dca0333, seqId: 103) successfully. Total added request num is:2
+[2026-03-31 16:51:05.389686] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 231210494199476474/0, EngineReqId: 2b9d524681bfdb732aba716c3dca0333
+[2026-03-31 16:51:05.389697] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 231210494199476474, status: 1, type: 1
+[2026-03-31 16:51:05.389752] [548] [658] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 231210494199476474
+[2026-03-31 16:51:05.460019][UC][D] Cache task(1,Load,64,585105408) finished, cost 270.023ms. [12936,21779][trans_manager.h:61,operator()]
+[2026-03-31 16:51:05.460046][UC][D] Cache task(1,Load,64,585105408) finished, cost 272.868ms. [12939,21753][trans_manager.h:61,operator()]
+[2026-03-31 16:51:05.460072][UC][D] Cache task(1,Load,64,585105408) finished, cost 271.720ms. [12965,21740][trans_manager.h:61,operator()]
+[2026-03-31 16:51:05.460046][UC][D] Cache task(1,Load,64,585105408) finished, cost 269.615ms. [12983,21662][trans_manager.h:61,operator()]
+[2026-03-31 16:51:05.460046][UC][D] Cache task(1,Load,64,585105408) finished, cost 273.332ms. [12954,21805][trans_manager.h:61,operator()]
+[2026-03-31 16:51:05.460060][UC][D] Cache task(1,Load,64,585105408) finished, cost 265.995ms. [12943,21818][trans_manager.h:61,operator()]
+[2026-03-31 16:51:05.460077][UC][D] Cache task(1,Load,64,585105408) finished, cost 269.730ms. [12930,21766][trans_manager.h:61,operator()]
+[2026-03-31 16:51:05.460076][UC][D] Cache task(1,Load,64,585105408) finished, cost 268.880ms. [12933,21792][trans_manager.h:61,operator()]
+[2026-03-31 16:51:05,461] [12930] [281470442199168] [llm] [INFO] [prefix_cache_plugin.py-169] : Prefix Cache Reporter: #batchsize: 1, #batched-tokens: 16392, #local cached-tokens: 0, #local cache hit rate: 0.0%, #remote cached-tokens: 8192, #remote cache hit rate: 49.976%, #cache hit rate: 49.976%
+[2026-03-31 16:51:05,461] [12930] [281470442199168] [llm] [INFO] [prefix_cache_plugin.py-177] : Prefix Cache Global Reporter: #total prefill tokens: 16392, #total local matched tokens: 0, #total local cached hit rate: 0.0%, #total remote matched tokens: 8192, #total remote cached hit rate: 49.976%, #total cached hit rate: 49.976%
+[2026-03-31 16:51:05,480] [12930] [281470442199168] [llmmodels] [INFO] [flash_causal_deepseekv2.py-2457] : <<<<<<< ori k_caches[0].shape=torch.Size([1105, 32, 128, 16])
+[2026-03-31 16:51:05,481] [12930] [281470442199168] [llmmodels] [INFO] [flash_causal_deepseekv2.py-2496] : >>>>>>id of kcache is 281463844420112 id of vcache is 281463844420208
+[2026-03-31 16:51:05.481872] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 827878755659557921
+[2026-03-31 16:51:05.482036] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.482066] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 0, Add request(llmMgrReqId: 827878755659557921/0, EngineReqId: 93102f03ed7587bae7e805752867de3b, seqId: 104) successfully. Total added request num is:3
+[2026-03-31 16:51:05.482078] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 827878755659557921/0, EngineReqId: 93102f03ed7587bae7e805752867de3b
+[2026-03-31 16:51:05.482091] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 827878755659557921, status: 1, type: 1
+[2026-03-31 16:51:05.482137] [548] [650] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 827878755659557921
+[W compiler_depend.ts:116] Warning: Driver Version: `����� is invalid or not supported yet. (function operator())
+[W compiler_depend.ts:116] Warning: Driver Version: `�6��� is invalid or not supported yet. (function operator())
+[W compiler_depend.ts:116] Warning: Driver Version: `�5��� is invalid or not supported yet. (function operator())
+[W compiler_depend.ts:116] Warning: Driver Version: `���� is invalid or not supported yet. (function operator())
+[W compiler_depend.ts:116] Warning: Driver Version: `����� is invalid or not supported yet. (function operator())
+[W compiler_depend.ts:116] Warning: Driver Version: `����� is invalid or not supported yet. (function operator())
+[W compiler_depend.ts:116] Warning: Driver Version: `����� is invalid or not supported yet. (function operator())
+[W compiler_depend.ts:116] Warning: Driver Version: `����� is invalid or not supported yet. (function operator())
+[2026-03-31 16:51:05.578252] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 13649415577054027419
+[2026-03-31 16:51:05.578410] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.578439] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 1, Add request(llmMgrReqId: 13649415577054027419/0, EngineReqId: 5327451b9ea92fa4a44e525a14b145e9, seqId: 105) successfully. Total added request num is:3
+[2026-03-31 16:51:05.578450] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 13649415577054027419/0, EngineReqId: 5327451b9ea92fa4a44e525a14b145e9
+[2026-03-31 16:51:05.578462] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 13649415577054027419, status: 1, type: 1
+[2026-03-31 16:51:05.578527] [548] [660] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 13649415577054027419
+[2026-03-31 16:51:05.674432] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 9994908478110755092
+[2026-03-31 16:51:05.674692] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.674739] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 0, Add request(llmMgrReqId: 9994908478110755092/0, EngineReqId: 1de747a160f062500064f0e77ca6afec, seqId: 106) successfully. Total added request num is:4
+[2026-03-31 16:51:05.674751] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 9994908478110755092/0, EngineReqId: 1de747a160f062500064f0e77ca6afec
+[2026-03-31 16:51:05.674763] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 9994908478110755092, status: 1, type: 1
+[2026-03-31 16:51:05.674810] [548] [671] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 9994908478110755092
+[2026-03-31 16:51:05.770464] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 15118304865292133969
+[2026-03-31 16:51:05.770745] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.770791] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 1, Add request(llmMgrReqId: 15118304865292133969/0, EngineReqId: f705501ba037b18a742d23cb054586da, seqId: 107) successfully. Total added request num is:4
+[2026-03-31 16:51:05.770807] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 15118304865292133969/0, EngineReqId: f705501ba037b18a742d23cb054586da
+[2026-03-31 16:51:05.770879] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 15118304865292133969, status: 1, type: 1
+[2026-03-31 16:51:05.770928] [548] [652] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 15118304865292133969
+[2026-03-31 16:51:05.874221] [548] [21935] [llm] [INFO] [llm_engine.h:183] Since last schedule, pass 60 seconds, AsyncBatchNum=1, freeNpuBlockNum=974, freeCpuBlockNum=895
+[2026-03-31 16:51:05.874274] [548] [21936] [llm] [INFO] [llm_engine.h:183] Since last schedule, pass 60 seconds, AsyncBatchNum=1, freeNpuBlockNum=1103, freeCpuBlockNum=895
+[2026-03-31 16:51:05.885754] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 4152498073475866034
+[2026-03-31 16:51:05.886465] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.886558] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 0, Add request(llmMgrReqId: 4152498073475866034/0, EngineReqId: 7a410c70162aeb3285476f5e80431ac3, seqId: 108) successfully. Total added request num is:5
+[2026-03-31 16:51:05.886578] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 4152498073475866034/0, EngineReqId: 7a410c70162aeb3285476f5e80431ac3
+[2026-03-31 16:51:05.886795] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 4152498073475866034, status: 1, type: 1
+[2026-03-31 16:51:05.886996] [548] [654] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 4152498073475866034
+[2026-03-31 16:51:05.933+08:00] [545] [281473737283712] [node_manager] [INFO] [heartbeat_mng.py:100] Monitering EP status
+[2026-03-31 16:51:05:0933+08:00] [545] [7] [INFO] [heartbeat_mng.py:100] : Monitering EP status
+[2026-03-31 16:51:05.938+08:00] [545] [281473737283712] [node_manager] [INFO] [heartbeat_mng.py:216] [HeartBeatMng] set running status=NodeRunningStatus.NORMAL
+[2026-03-31 16:51:05:0938+08:00] [545] [7] [INFO] [heartbeat_mng.py:216] : [HeartBeatMng] set running status=NodeRunningStatus.NORMAL
+[2026-03-31 16:51:05.987642] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 6041643822217012281
+[2026-03-31 16:51:05.987824] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:05.987851] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 1, Add request(llmMgrReqId: 6041643822217012281/0, EngineReqId: 76f57ff972b5c09d3a982b57eaf5bf9e, seqId: 109) successfully. Total added request num is:5
+[2026-03-31 16:51:05.987862] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 6041643822217012281/0, EngineReqId: 76f57ff972b5c09d3a982b57eaf5bf9e
+[2026-03-31 16:51:05.987872] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 6041643822217012281, status: 1, type: 1
+[2026-03-31 16:51:05.987947] [548] [666] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 6041643822217012281
+[2026-03-31 16:51:06.085711] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 11532298231785349625
+[2026-03-31 16:51:06.085864] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:06.085894] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 0, Add request(llmMgrReqId: 11532298231785349625/0, EngineReqId: 7e7897e4b7dbabc3efeff4f400c72439, seqId: 110) successfully. Total added request num is:6
+[2026-03-31 16:51:06.085905] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 11532298231785349625/0, EngineReqId: 7e7897e4b7dbabc3efeff4f400c72439
+[2026-03-31 16:51:06.085914] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 11532298231785349625, status: 1, type: 1
+[2026-03-31 16:51:06.085945] [548] [669] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 11532298231785349625
+[2026-03-31 16:51:06.184329] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 12721762812760458468
+[2026-03-31 16:51:06.184478] [548] [21937] [llm] [INFO] [lora_manager.cpp:250] [LoraManager::ValidateLoraId] LoraId is not available, will use baseModel to inference.
+[2026-03-31 16:51:06.184505] [548] [21937] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 1, Add request(llmMgrReqId: 12721762812760458468/0, EngineReqId: 34946c17f25e177efab1977cb0761f3a, seqId: 111) successfully. Total added request num is:6
+[2026-03-31 16:51:06.184516] [548] [21937] [llm] [INFO] [llm_manager_impl.cpp:1566] Insert a new inferRequest, llmMgrReqId: 12721762812760458468/0, EngineReqId: 34946c17f25e177efab1977cb0761f3a
+[2026-03-31 16:51:06.184526] [548] [21937] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 12721762812760458468, status: 1, type: 1
+[2026-03-31 16:51:06.184558] [548] [662] [server] [INFO] [llm_infer_model_instance.cpp:702] [llm_backend] LLM backend enqueue request finished, request_id=: 12721762812760458468
+[2026-03-31 16:51:06.652254][UC][D] Cache task(2,Dump,8,73138176) dispatching. [12930,21777][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:06.652265][UC][D] Cache task(2,Dump,8,73138176) dispatching. [12939,21764][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:06.652370][UC][D] Cache task(2) start running, wait 0.105ms. [12939,21759][dump_queue.cc:83,DispatchOneTask]
+[2026-03-31 16:51:06.652399][UC][D] Try to dump (8) shards. [12939,21759][dump_queue.cc:97,DumpOneTask]
+[2026-03-31 16:51:06.652375][UC][D] Cache task(2,Dump,8,73138176) dispatching. [12936,21790][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:06.652375][UC][D] Cache task(2,Dump,8,73138176) dispatching. [12965,21751][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:06.652375][UC][D] Cache task(2,Dump,8,73138176) dispatching. [12954,21816][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:06.652417][UC][D] Cache task(2,Dump,8,73138176) dispatching. [12983,21673][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:06.652459][UC][D] Cache task(2,Dump,8,73138176) dispatching. [12943,21829][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:06.652508][UC][D] Cache task(2) start running, wait 0.130ms. [12954,21811][dump_queue.cc:83,DispatchOneTask]
+[2026-03-31 16:51:06.652527][UC][D] Cache task(2) start running, wait 0.210ms. [12930,21772][dump_queue.cc:83,DispatchOneTask]
+[2026-03-31 16:51:06.652548][UC][D] Cache task(2) start running, wait 0.170ms. [12936,21785][dump_queue.cc:83,DispatchOneTask]
+[2026-03-31 16:51:06.652571][UC][D] Cache task(2) start running, wait 0.191ms. [12965,21746][dump_queue.cc:83,DispatchOneTask]
+[2026-03-31 16:51:06.652587][UC][D] Try to dump (8) shards. [12936,21785][dump_queue.cc:97,DumpOneTask]
+[2026-03-31 16:51:06.652536][UC][D] Cache task(2) start running, wait 0.107ms. [12983,21668][dump_queue.cc:83,DispatchOneTask]
+[2026-03-31 16:51:06.652565][UC][D] Try to dump (8) shards. [12983,21668][dump_queue.cc:97,DumpOneTask]
+[2026-03-31 16:51:06.652600][UC][D] Try to dump (8) shards. [12965,21746][dump_queue.cc:97,DumpOneTask]
+[2026-03-31 16:51:06.652533][UC][D] Try to dump (8) shards. [12954,21811][dump_queue.cc:97,DumpOneTask]
+[2026-03-31 16:51:06.652557][UC][D] Try to dump (8) shards. [12930,21772][dump_queue.cc:97,DumpOneTask]
+[2026-03-31 16:51:06.652642][UC][D] Cache task(2) start running, wait 0.173ms. [12943,21824][dump_queue.cc:83,DispatchOneTask]
+[2026-03-31 16:51:06.652589][UC][D] Cache task(2,Dump,8,73138176) dispatching. [12933,21803][trans_manager.h:58,Dispatch]
+[2026-03-31 16:51:06.652674][UC][D] Try to dump (8) shards. [12943,21824][dump_queue.cc:97,DumpOneTask]
+[2026-03-31 16:51:06.652691][UC][D] Cache task(2) start running, wait 0.103ms. [12933,21798][dump_queue.cc:83,DispatchOneTask]
+[2026-03-31 16:51:06.652806][UC][D] Try to dump (8) shards. [12933,21798][dump_queue.cc:97,DumpOneTask]
+[2026-03-31 16:51:06,653] [12930] [281470442199168] [llm] [INFO] [plugin_manager.py-112] : Waiting save to finished
+[2026-03-31 16:51:06,653] [12939] [281470696151168] [llm] [INFO] [plugin_manager.py-112] : Waiting save to finished
+[2026-03-31 16:51:06,653] [12954] [281470888827008] [llm] [INFO] [plugin_manager.py-112] : Waiting save to finished
+[2026-03-31 16:51:06,653] [12943] [281471251634304] [llm] [INFO] [plugin_manager.py-112] : Waiting save to finished
+[2026-03-31 16:51:06,653] [12983] [281470721054848] [llm] [INFO] [plugin_manager.py-112] : Waiting save to finished
+[2026-03-31 16:51:06,653] [12933] [281470911109248] [llm] [INFO] [plugin_manager.py-112] : Waiting save to finished
+[2026-03-31 16:51:06.659857] [548] [573] [llm] [INFO] [model_exec_output_handler.cpp:47] Can not find sequence group, seqId=100
+[2026-03-31 16:51:06.660757] [548] [21936] [llm] [INFO] [llm_engine.cpp:478] [Scheduler|Schedule-Response] Response and schedule transfer cost too long. DP RankId:1, response cost:1486, ScheduleExecTransfer cost:0, scheduleCost:56, totalIterCost:1542, schedulingRound:9287
+[2026-03-31 16:51:06.662483][UC][D] Posix task(1,Cache2Backend,8,73138176) dispatching. [12936,21785][io_engine_psync.h:53,Dispatch]
+[2026-03-31 16:51:06.662578][UC][D] Cache task(2) mk_buf=2.576ms, sync=7.285ms, back=0.122ms. [12936,21785][dump_queue.cc:139,DumpOneTask]
+[2026-03-31 16:51:06.662587][UC][D] Cache task(2,Dump,8,73138176) finished, cost 10.223ms. [12936,21785][trans_manager.h:61,operator()]
+[2026-03-31 16:51:06.663048][UC][D] Posix task(1,Cache2Backend,8,73138176) dispatching. [12965,21746][io_engine_psync.h:53,Dispatch]
+[2026-03-31 16:51:06.663107][UC][D] Cache task(2) mk_buf=2.706ms, sync=7.725ms, back=0.072ms. [12965,21746][dump_queue.cc:139,DumpOneTask]
+[2026-03-31 16:51:06.663116][UC][D] Cache task(2,Dump,8,73138176) finished, cost 10.752ms. [12965,21746][trans_manager.h:61,operator()]
+[2026-03-31 16:51:06.663325][UC][D] Posix dump task(1) start running, wait 0.829ms. [12936,20472][trans_queue.cc:111,DumpWorker]
+[2026-03-31 16:51:06.663530][UC][D] Posix task(1,Cache2Backend,8,73138176) dispatching. [12930,21772][io_engine_psync.h:53,Dispatch]
+[2026-03-31 16:51:06.663595][UC][D] Cache task(2) mk_buf=2.438ms, sync=8.509ms, back=0.075ms. [12930,21772][dump_queue.cc:139,DumpOneTask]
+[2026-03-31 16:51:06.663605][UC][D] Cache task(2,Dump,8,73138176) finished, cost 11.364ms. [12930,21772][trans_manager.h:61,operator()]
+[2026-03-31 16:51:06.663649][UC][D] Posix dump task(1) start running, wait 0.108ms. [12930,20377][trans_queue.cc:111,DumpWorker]
+[2026-03-31 16:51:06.663947][UC][D] Posix task(1,Cache2Backend,8,73138176) dispatching. [12983,21668][io_engine_psync.h:53,Dispatch]
+[2026-03-31 16:51:06.663950][UC][D] Posix task(1,Cache2Backend,8,73138176) dispatching. [12943,21824][io_engine_psync.h:53,Dispatch]
+[2026-03-31 16:51:06,663] [12930] [281470442199168] [llm] [INFO] [plugin_manager.py-115] : Save finished in 10.5 ms
+[2026-03-31 16:51:06.664027][UC][D] Cache task(2) mk_buf=2.547ms, sync=8.806ms, back=0.101ms. [12983,21668][dump_queue.cc:139,DumpOneTask]
+[2026-03-31 16:51:06.664037][UC][D] Cache task(2,Dump,8,73138176) finished, cost 11.633ms. [12983,21668][trans_manager.h:61,operator()]
+[2026-03-31 16:51:06.664027][UC][D] Cache task(2) mk_buf=3.683ms, sync=7.529ms, back=0.131ms. [12943,21824][dump_queue.cc:139,DumpOneTask]
+[2026-03-31 16:51:06.664036][UC][D] Cache task(2,Dump,8,73138176) finished, cost 11.587ms. [12943,21824][trans_manager.h:61,operator()]
+[2026-03-31 16:51:06.664405][UC][D] Posix dump task(1) start running, wait 1.343ms. [12965,20515][trans_queue.cc:111,DumpWorker]
+[2026-03-31 16:51:06.664430][UC][D] Posix task(2,Cache2Backend,8,73138176) dispatching. [12954,21811][io_engine_psync.h:53,Dispatch]
+[2026-03-31 16:51:06,664] [12943] [281471251634304] [llm] [INFO] [plugin_manager.py-115] : Save finished in 10.5 ms
+[2026-03-31 16:51:06.664510][UC][D] Cache task(2) mk_buf=2.420ms, sync=9.449ms, back=0.093ms. [12954,21811][dump_queue.cc:139,DumpOneTask]
+[2026-03-31 16:51:06.664522][UC][D] Cache task(2,Dump,8,73138176) finished, cost 12.159ms. [12954,21811][trans_manager.h:61,operator()]
+[2026-03-31 16:51:06,664] [12983] [281470721054848] [llm] [INFO] [plugin_manager.py-115] : Save finished in 10.1 ms
+[2026-03-31 16:51:06,664] [12954] [281470888827008] [llm] [INFO] [plugin_manager.py-115] : Save finished in 11.1 ms
+[2026-03-31 16:51:06.664980][UC][D] Posix dump task(1) start running, wait 1.021ms. [12943,20352][trans_queue.cc:111,DumpWorker]
+[2026-03-31 16:51:06.665269][UC][D] Posix dump task(2) start running, wait 0.830ms. [12954,20449][trans_queue.cc:111,DumpWorker]
+[2026-03-31 16:51:06.665499][UC][D] Posix dump task(1) start running, wait 1.545ms. [12983,20422][trans_queue.cc:111,DumpWorker]
+[2026-03-31 16:51:06.665696][UC][D] Posix task(1,Cache2Backend,8,73138176) dispatching. [12933,21798][io_engine_psync.h:53,Dispatch]
+[2026-03-31 16:51:06.665777][UC][D] Cache task(2) mk_buf=3.036ms, sync=9.833ms, back=0.103ms. [12933,21798][dump_queue.cc:139,DumpOneTask]
+[2026-03-31 16:51:06.665787][UC][D] Cache task(2,Dump,8,73138176) finished, cost 13.207ms. [12933,21798][trans_manager.h:61,operator()]
+[2026-03-31 16:51:06,666] [12965] [281471270049920] [llm] [INFO] [plugin_manager.py-112] : Waiting save to finished
+[2026-03-31 16:51:06,666] [12933] [281470911109248] [llm] [INFO] [plugin_manager.py-115] : Save finished in 11.9 ms
+[2026-03-31 16:51:06,666] [12965] [281471270049920] [llm] [INFO] [plugin_manager.py-115] : Save finished in 0.0 ms
+[2026-03-31 16:51:06.666438][UC][D] Posix dump task(1) start running, wait 0.728ms. [12933,20538][trans_queue.cc:111,DumpWorker]
+[2026-03-31 16:51:06.667013][UC][D] Posix task(1,Cache2Backend,8,73138176) dispatching. [12939,21759][io_engine_psync.h:53,Dispatch]
+[2026-03-31 16:51:06,666] [12936] [281470461925504] [llm] [INFO] [plugin_manager.py-112] : Waiting save to finished
+[2026-03-31 16:51:06.667143][UC][D] Cache task(2) mk_buf=3.867ms, sync=10.713ms, back=0.144ms. [12939,21759][dump_queue.cc:139,DumpOneTask]
+[2026-03-31 16:51:06.667155][UC][D] Cache task(2,Dump,8,73138176) finished, cost 14.901ms. [12939,21759][trans_manager.h:61,operator()]
+[2026-03-31 16:51:06,667] [12936] [281470461925504] [llm] [INFO] [plugin_manager.py-115] : Save finished in 0.0 ms
+[2026-03-31 16:51:06.667558][UC][D] Cache lookup(1) costs 0.035ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06,667] [12939] [281470696151168] [llm] [INFO] [plugin_manager.py-115] : Save finished in 14.0 ms
+[2026-03-31 16:51:06.668260][UC][D] Posix dump task(1) start running, wait 1.241ms. [12939,20290][trans_queue.cc:111,DumpWorker]
+[2026-03-31 16:51:06.673282] [548] [21830] [server] [INFO] [prefill_wrapper.cpp:194] [endpoint] [P Node] Finish decode tokenIds. RequestId is 18324423956197081082
+[2026-03-31 16:51:06.673313] [548] [21830] [llm] [INFO] [model_exec_output_handler.cpp:65] [LlmEngine|Request-Publish Complete] DP RankId: 0. Request Prefill Complete, llmMgrReqId:18324423956197081082, seqId: 100, pInstanceId:0, localDPRank_:0
+[2026-03-31 16:51:06.673330] [548] [21830] [server] [INFO] [llm_infer_model_instance.cpp:343] [llm_backend] In Service, dpInstanceIds 1 ==== size = 1
+[2026-03-31 16:51:06.673336] [548] [21830] [server] [INFO] [llm_infer_model_instance.cpp:345] [llm_backend] In Service, dpInstanceIds 1 ==== first = 0
+[2026-03-31 16:51:06.673340] [548] [21830] [server] [INFO] [llm_infer_model_instance.cpp:354] [llm_backend] In Service, dpInstanceIds 2 ==== size = 1
+[2026-03-31 16:51:06.673349] [548] [21935] [llm] [INFO] [llm_engine.cpp:478] [Scheduler|Schedule-Response] Response and schedule transfer cost too long. DP RankId:0, response cost:1500, ScheduleExecTransfer cost:0, scheduleCost:56, totalIterCost:1556, schedulingRound:9287
+[2026-03-31 16:51:06.673355] [548] [21830] [server] [INFO] [llm_infer_model_instance.cpp:356] [llm_backend] In Service, dpInstanceIds 2 ==== first = 0
+[2026-03-31 16:51:06.673648] [548] [21830] [server] [INFO] [dmi_msg_sender.cpp:33] [endpoint] Client init without tls.
+[2026-03-31 16:51:06.674038] [548] [21830] [server] [INFO] [grpc_communication_mng.cpp:403] [endpoint] Init decode sender success
+[2026-03-31 16:51:06.676312][UC][D] Cache lookup(1/1) in backend costs 8.691ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.676685][UC][D] Cache lookup(1) costs 0.024ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.684312][UC][D] Cache lookup(1/1) in backend costs 7.604ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.684539][UC][D] Cache lookup(1) costs 0.002ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.685755] [548] [648] [server] [INFO] [llm_infer_model_instance.cpp:1441] [infer_backend_manager] Start HandleLora
+[2026-03-31 16:51:06.708476][UC][D] Cache lookup(1/1) in backend costs 23.909ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.708778][UC][D] Cache lookup(1) costs 0.015ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.709642][UC][D] Posix task(1,Cache2Backend,8,73138176) finished, cost 46.084ms. [12930,20384][io_engine_psync.h:56,operator()]
+[2026-03-31 16:51:06.709771][UC][D] Cache lookup(1/1) in backend costs 0.972ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.710074][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.710174][UC][D] Posix task(1,Cache2Backend,8,73138176) finished, cost 44.470ms. [12933,20544][io_engine_psync.h:56,operator()]
+[2026-03-31 16:51:06.710699][UC][D] Cache lookup(1/1) in backend costs 0.607ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.710891][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.711350][UC][D] Cache lookup(1/1) in backend costs 0.445ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.711516][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.711761][UC][D] Posix task(1,Cache2Backend,8,73138176) finished, cost 47.807ms. [12943,20351][io_engine_psync.h:56,operator()]
+[2026-03-31 16:51:06.711757][UC][D] Posix task(1,Cache2Backend,8,73138176) finished, cost 48.689ms. [12965,20513][io_engine_psync.h:56,operator()]
+[2026-03-31 16:51:06.711882][UC][D] Cache lookup(1/1) in backend costs 0.354ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.712023][UC][D] Posix task(2,Cache2Backend,8,73138176) finished, cost 47.590ms. [12954,20450][io_engine_psync.h:56,operator()]
+[2026-03-31 16:51:06.712079][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.712494][UC][D] Cache lookup(1/1) in backend costs 0.396ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.712697][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.712677][UC][D] Posix task(1,Cache2Backend,8,73138176) finished, cost 45.675ms. [12939,20290][io_engine_psync.h:56,operator()]
+[2026-03-31 16:51:06.712745][UC][D] Posix task(1,Cache2Backend,8,73138176) finished, cost 50.260ms. [12936,20476][io_engine_psync.h:56,operator()]
+[2026-03-31 16:51:06.713106][UC][D] Cache lookup(1/1) in backend costs 0.396ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.713285][UC][D] Cache lookup(1) costs 0.012ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.713890][UC][D] Cache lookup(1/1) in backend costs 0.592ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.714074][UC][D] Cache lookup(1) costs 0.012ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.714440][UC][D] Cache lookup(1/1) in backend costs 0.354ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.714648][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.715112][UC][D] Cache lookup(1/1) in backend costs 0.449ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.715286][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.716196][UC][D] Cache lookup(1/1) in backend costs 0.898ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.716464][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.716959][UC][D] Cache lookup(1/1) in backend costs 0.482ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.717069][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.717489][UC][D] Cache lookup(1/1) in backend costs 0.406ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.717652][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.718189][UC][D] Cache lookup(1/1) in backend costs 0.524ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.718346][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.718823][UC][D] Cache lookup(1/1) in backend costs 0.467ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.718985][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.719392][UC][D] Cache lookup(1/1) in backend costs 0.395ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.719549][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.719928][UC][D] Cache lookup(1/1) in backend costs 0.367ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.720100][UC][D] Cache lookup(1) costs 0.011ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.720466][UC][D] Cache lookup(1/1) in backend costs 0.353ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.720639][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.721033][UC][D] Cache lookup(1/1) in backend costs 0.383ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.721200][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.721757][UC][D] Cache lookup(1/1) in backend costs 0.545ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.721916][UC][D] Cache lookup(1) costs 0.001ms. [548,21935][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.722257][UC][D] Cache lookup(1/1) in backend costs 0.329ms. [548,21935][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.722428][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.722842][UC][D] Cache lookup(1/1) in backend costs 0.401ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.723043][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.723398][UC][D] Cache lookup(1/1) in backend costs 0.343ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.723575][UC][D] Cache lookup(1) costs 0.011ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.724129][UC][D] Cache lookup(1/1) in backend costs 0.542ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.724694][UC][D] Cache lookup(1) costs 0.012ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.725255][UC][D] Cache lookup(1/1) in backend costs 0.547ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.725521][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.725977][UC][D] Cache lookup(1/1) in backend costs 0.443ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.726288][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.726332] [548] [599] [server] [INFO] [dmi_msg_receiver.cpp:99] [endpoint] Get kv release request, reqId is 18324423956197081082
+[2026-03-31 16:51:06.726768][UC][D] Cache lookup(1/1) in backend costs 0.466ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.727013] [548] [22903] [server] [INFO] [infer_backend_manager.cpp:398] [infer_backend_manager] [InferBackendManager::ControlRequest] send control request with operation 2 to modelInstance, RequestId is 18324423956197081082
+[2026-03-31 16:51:06.727267][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.727670][UC][D] Cache lookup(1/1) in backend costs 0.388ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.727850][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.728212][UC][D] Cache lookup(1/1) in backend costs 0.350ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.728552] [548] [21938] [llm] [INFO] [llm_manager_impl.cpp:1762] Get a new ControlRequest from server, llmMgrReqId: 18324423956197081082, EngineReqId: 293db75c2470cf2ff799bf7538adfc73, with operation:2
+[2026-03-31 16:51:06.728660][UC][D] Cache lookup(1) costs 0.001ms. [548,21936][buffer_manager.h:87,Lookup]
+[2026-03-31 16:51:06.728998][UC][D] Cache lookup(1/1) in backend costs 0.323ms. [548,21936][buffer_manager.h:115,LookupOnPrefixFast]
+[2026-03-31 16:51:06.728994] [548] [21938] [llm] [INFO] [llm_engine.cpp:236] [LlmEngine] DP RankId: 0. Send Release KV response(EngineReqId: 293db75c2470cf2ff799bf7538adfc73) successfully.
+[2026-03-31 16:51:06.729013] [548] [21938] [server] [INFO] [llm_infer_model_instance.cpp:578] [llm_backend] Called SendStatusCallbackImpl with llmMgrReqId: 18324423956197081082, status: 1, type: 0
+[2026-03-31 16:51:06.729060] [548] [22903] [server] [INFO] [llm_infer_model_instance.cpp:816] [llm_backend] LLM backend control request finished, request id: 18324423956197081082, operation: 2
+[2026-03-31 16:51:06.729070] [548] [22903] [server] [INFO] [infer_backend_manager.cpp:402] [infer_backend_manager] Backendmanager control request successfully, RequestId is 18324423956197081082
