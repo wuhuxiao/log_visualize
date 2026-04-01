@@ -158,7 +158,7 @@ export default function App() {
             <input
               type="range"
               min="1"
-              max="16"
+              max="64"
               step="0.5"
               value={timelineZoom}
               onChange={(event) => setTimelineZoom(Number(event.target.value))}
