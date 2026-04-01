@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type WheelEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { clamp, formatDuration, formatTimestamp } from "../../utils/time";
 
 export interface TimelineItem {
@@ -11,6 +11,7 @@ export interface TimelineItem {
   accentColor?: string;
   meta: Record<string, string | number | boolean | null | undefined>;
   anomaly?: boolean;
+  selected?: boolean;
   legendKey?: string;
   legendLabel?: string;
 }
@@ -26,6 +27,8 @@ const MIN_BAR_LABEL_WIDTH = 84;
 const MAX_ZOOM = 24;
 
 export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: TimelineChartProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
   const [zoom, setZoom] = useState(initialZoom);
   const [pan, setPan] = useState(0);
 
@@ -34,8 +37,20 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
   }, [initialZoom]);
 
   useEffect(() => {
-    setPan((current) => clamp(current, 0, 1));
-  }, [zoom]);
+    const node = containerRef.current;
+    if (!node) {
+      return;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width ?? 0;
+      setContainerWidth(width);
+    });
+    observer.observe(node);
+    setContainerWidth(node.getBoundingClientRect().width);
+
+    return () => observer.disconnect();
+  }, []);
 
   const lanes = useMemo(() => [...new Set(items.map((item) => item.lane))], [items]);
   const min = Math.min(...items.map((item) => item.start ?? item.end ?? Number.MAX_SAFE_INTEGER));
@@ -47,12 +62,16 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
   const maxPanSpan = Math.max(0, fullSpan - visibleSpan);
   const visibleMin = safeMin + maxPanSpan * pan;
   const visibleMax = visibleMin + visibleSpan;
-  const width = 1200;
+  const width = Math.floor(containerWidth || 720);
   const laneHeight = 34;
-  const padding = { top: 24, left: 180, right: 40, bottom: 44 };
-  const innerWidth = width - padding.left - padding.right;
+  const padding = { top: 24, left: 180, right: 24, bottom: 44 };
+  const innerWidth = Math.max(200, width - padding.left - padding.right);
   const innerHeight = lanes.length * laneHeight;
   const totalHeight = innerHeight + padding.top + padding.bottom;
+
+  useEffect(() => {
+    setPan((current) => clamp(current, 0, 1));
+  }, [zoom]);
 
   const legendItems = useMemo(() => {
     const grouped = new Map<string, { label: string; color: string; count: number }>();
@@ -85,22 +104,6 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
     }
     return padding.left + clamp(((value - visibleMin) / (visibleMax - visibleMin)) * innerWidth, 0, innerWidth);
   };
-
-  function handleWheel(event: WheelEvent<HTMLDivElement>) {
-    if (items.length === 0) {
-      return;
-    }
-
-    event.preventDefault();
-    if (event.shiftKey) {
-      const nextPan = pan + event.deltaY / 1200;
-      setPan(clamp(nextPan, 0, 1));
-      return;
-    }
-
-    const nextZoom = clamp(zoom * (event.deltaY > 0 ? 0.9 : 1.1), 1, MAX_ZOOM);
-    setZoom(nextZoom);
-  }
 
   if (items.length === 0) {
     return (
@@ -135,9 +138,10 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
       </div>
 
       <div className="timeline-meta">
-        <span>窗口: {formatTimestamp(visibleMin)} ~ {formatTimestamp(visibleMax)}</span>
+        <span>
+          窗口: {formatTimestamp(visibleMin)} ~ {formatTimestamp(visibleMax)}
+        </span>
         <span>缩放: {zoom.toFixed(2)}x</span>
-        <span>提示: 滚轮缩放，`Shift + 滚轮` 平移</span>
       </div>
 
       <div className="timeline-legend">
@@ -165,7 +169,7 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
         </label>
       </div>
 
-      <div className="timeline-scroll" onWheel={handleWheel}>
+      <div ref={containerRef} className="timeline-scroll">
         <svg width={width} height={totalHeight} className="timeline-svg">
           {lanes.map((lane, laneIndex) => {
             const y = padding.top + laneIndex * laneHeight;
@@ -185,8 +189,7 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
             const start = item.start ?? item.end ?? safeMin;
             const end = item.end ?? item.start ?? start;
             const x = xFor(start);
-            const unclampedWidth = xFor(end) - x;
-            const barWidth = Math.max(4, unclampedWidth || 0);
+            const barWidth = Math.max(4, xFor(end) - x || 0);
             const showInlineLabel = barWidth >= MIN_BAR_LABEL_WIDTH;
             const tooltip = [
               item.label,
@@ -195,6 +198,8 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
               `end: ${formatTimestamp(item.end)}`,
               `duration: ${formatDuration(item.end && item.start ? item.end - item.start : undefined)}`
             ].join("\n");
+            const strokeWidth = item.selected ? 3 : item.anomaly ? 2 : 1;
+            const strokeColor = item.selected ? "#f8fafc" : item.anomaly ? "#ef4444" : item.accentColor ?? item.color;
 
             return (
               <g
@@ -211,8 +216,8 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
                   height={18}
                   rx={4}
                   fill={item.color}
-                  stroke={item.anomaly ? "#ef4444" : item.accentColor ?? item.color}
-                  strokeWidth={item.anomaly ? 2 : 1}
+                  stroke={strokeColor}
+                  strokeWidth={strokeWidth}
                 />
                 {showInlineLabel ? (
                   <text x={x + 6} y={y + 16} className="timeline-item-label">

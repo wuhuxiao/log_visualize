@@ -3,11 +3,12 @@ import { TimelineChart, type TimelineItem } from "./TimelineChart";
 
 interface UCTaskTimelineViewProps {
   tasks: NormalizedUCTask[];
-  zoom: number;
+  initialZoom?: number;
+  selectedTaskId?: string;
   onSelectTask: (taskId: string) => void;
 }
 
-export function UCTaskTimelineView({ tasks, zoom, onSelectTask }: UCTaskTimelineViewProps) {
+export function UCTaskTimelineView({ tasks, initialZoom = 2, selectedTaskId, onSelectTask }: UCTaskTimelineViewProps) {
   const items: TimelineItem[] = tasks.map((task) => {
     const isDump = task.category === "Dump" || task.category === "Cache2Backend";
     const color = task.category === "Lookup" ? "#6366f1" : isDump ? "#b45309" : "#0f766e";
@@ -19,6 +20,7 @@ export function UCTaskTimelineView({ tasks, zoom, onSelectTask }: UCTaskTimeline
       start: task.dispatchAt ?? task.startAt ?? task.finishAt,
       end: task.finishAt ?? task.startAt ?? task.dispatchAt,
       color,
+      selected: task.id === selectedTaskId,
       legendKey: `${task.ucKind}-${task.category}`,
       legendLabel: `${task.ucKind.toUpperCase()} / ${task.category}`,
       meta: {
@@ -38,5 +40,5 @@ export function UCTaskTimelineView({ tasks, zoom, onSelectTask }: UCTaskTimeline
     };
   });
 
-  return <TimelineChart title="Cache / Posix / Lookup 生命周期" items={items} initialZoom={zoom} onItemClick={onSelectTask} />;
+  return <TimelineChart title="Cache / Posix / Lookup 生命周期" items={items} initialZoom={initialZoom} onItemClick={onSelectTask} />;
 }

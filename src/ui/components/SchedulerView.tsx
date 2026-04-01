@@ -1,4 +1,5 @@
 import {
+  Bar,
   CartesianGrid,
   ComposedChart,
   Legend,
@@ -9,6 +10,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { buildSchedulerLookupSummaries } from "../../aggregations/derivedMetrics";
 import type { NormalizedUCTask, ParsedEvent } from "../../types/models";
 import { formatDuration, formatTimestamp } from "../../utils/time";
 
@@ -52,6 +54,11 @@ export function SchedulerView({ events, tasks, onSelectEvent }: SchedulerViewPro
       };
     });
 
+  const lookupWindows = buildSchedulerLookupSummaries(events, tasks).map((row) => ({
+    ...row,
+    timeLabel: formatTimestamp(row.timestampMs)
+  }));
+
   return (
     <div className="view-grid">
       <div className="chart-panel">
@@ -93,6 +100,24 @@ export function SchedulerView({ events, tasks, onSelectEvent }: SchedulerViewPro
         </ResponsiveContainer>
       </div>
 
+      <div className="chart-panel">
+        <h3>每次调度后的 Lookup 总耗时</h3>
+        <ResponsiveContainer width="100%" height={280}>
+          <ComposedChart data={lookupWindows}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+            <XAxis dataKey="timeLabel" stroke="#94a3b8" minTickGap={32} />
+            <YAxis stroke="#94a3b8" />
+            <Tooltip
+              formatter={(value: number, name: string) => (name.includes("Ms") ? formatDuration(value) : value)}
+              contentStyle={{ background: "#101827", border: "1px solid #334155" }}
+            />
+            <Legend />
+            <Bar dataKey="lookupTotalMs" fill="#6366f1" />
+            <Line type="monotone" dataKey="lookupCount" stroke="#22c55e" dot />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
       <div className="table-panel">
         <h3>调度异常点</h3>
         <table className="data-table">
@@ -107,16 +132,38 @@ export function SchedulerView({ events, tasks, onSelectEvent }: SchedulerViewPro
           </thead>
           <tbody>
             {responseData.map((row) => (
-              <tr
-                key={row.id}
-                className={row.anomaly ? "anomaly-row" : undefined}
-                onClick={() => onSelectEvent(row.id)}
-              >
+              <tr key={row.id} className={row.anomaly ? "anomaly-row" : undefined} onClick={() => onSelectEvent(row.id)}>
                 <td>{row.timeLabel}</td>
                 <td>{formatDuration(row.responseCostMs)}</td>
                 <td>{formatDuration(row.scheduleCostMs)}</td>
                 <td>{formatDuration(row.totalIterCostMs)}</td>
                 <td>{row.overlapCount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="table-panel">
+        <h3>调度窗口 Lookup 汇总</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>time</th>
+              <th>worker</th>
+              <th>phase</th>
+              <th>lookup count</th>
+              <th>lookup total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lookupWindows.map((row) => (
+              <tr key={row.id} onClick={() => onSelectEvent(row.id)}>
+                <td>{row.timeLabel}</td>
+                <td>{row.workerId}</td>
+                <td>{row.phase}</td>
+                <td>{row.lookupCount}</td>
+                <td>{formatDuration(row.lookupTotalMs)}</td>
               </tr>
             ))}
           </tbody>

@@ -31,7 +31,9 @@ export function RequestListView({ requests, selectedRequestId, onSelectRequest }
           {requests.map((request) => (
             <tr
               key={request.id}
-              className={request.id === selectedRequestId ? "selected-row" : request.anomalies.length ? "anomaly-row" : undefined}
+              className={
+                request.id === selectedRequestId ? "selected-row" : request.anomalies.length ? "anomaly-row" : undefined
+              }
               onClick={() => onSelectRequest(request.id)}
             >
               <td>{request.llmMgrReqId ?? request.llmMgrReqIdRaw ?? "n/a"}</td>

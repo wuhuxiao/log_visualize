@@ -30,6 +30,9 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
     const relatedTasks = result.ucTasks.filter((task) =>
       task.relatedRequestIds.some(({ requestId }) => requestId === selectedRequest.id)
     );
+    const lookupTasks = relatedTasks.filter((task) => task.category === "Lookup");
+    const nonLookupTasks = relatedTasks.filter((task) => task.category !== "Lookup");
+
     return (
       <aside className="detail-panel">
         <h2>请求详情</h2>
@@ -51,9 +54,9 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
             </div>
           ))}
         </div>
-        <h3>相关 UC task</h3>
+        <h3>相关 UC Task</h3>
         <div className="detail-list">
-          {relatedTasks.map((task) => (
+          {nonLookupTasks.map((task) => (
             <div key={task.id} className="detail-card">
               <strong>
                 {task.category} / {task.taskId ?? "n/a"}
@@ -62,6 +65,17 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
               <span>耗时: {formatDuration(task.costMs)}</span>
             </div>
           ))}
+        </div>
+        <h3>Lookup Task 列表</h3>
+        <div className="detail-scroll-list">
+          {lookupTasks.map((task) => (
+            <div key={task.id} className="detail-card compact">
+              <strong>{task.taskId ?? task.id}</strong>
+              <span>{task.workerId}</span>
+              <span>耗时: {formatDuration(task.costMs)}</span>
+            </div>
+          ))}
+          {lookupTasks.length === 0 ? <div className="detail-muted">没有关联的 lookup task。</div> : null}
         </div>
         <h3>异常</h3>
         {renderAnomalies(selectedRequest.anomalies)}
@@ -72,7 +86,7 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
   if (selectedTask) {
     return (
       <aside className="detail-panel">
-        <h2>UC task 详情</h2>
+        <h2>UC Task 详情</h2>
         <div className="detail-card">
           <strong>
             {selectedTask.category} / {selectedTask.taskId ?? "n/a"}

@@ -323,7 +323,8 @@ button:hover {
 }
 
 .timeline-scroll {
-  overflow: auto;
+  width: 100%;
+  overflow: hidden;
 }
 
 .timeline-svg {
@@ -360,6 +361,18 @@ button:hover {
   display: grid;
   gap: 4px;
   font-size: 13px;
+}
+
+.detail-card.compact {
+  padding: 10px;
+}
+
+.detail-scroll-list {
+  display: grid;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .detail-card.anomaly {

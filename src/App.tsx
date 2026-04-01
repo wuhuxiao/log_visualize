@@ -50,7 +50,7 @@ export default function App() {
   const [selectedRequestId, setSelectedRequestId] = useState<string>();
   const [selectedTaskId, setSelectedTaskId] = useState<string>();
   const [selectedEventId, setSelectedEventId] = useState<string>();
-  const [zoom, setZoom] = useState(2);
+  const [timelineZoom, setTimelineZoom] = useState(2);
 
   useEffect(() => {
     loadSampleSources(["demo", "mixed-workers"]).then(setSources).catch(() => undefined);
@@ -142,17 +142,17 @@ export default function App() {
               min="1"
               max="8"
               step="0.5"
-              value={zoom}
-              onChange={(event) => setZoom(Number(event.target.value))}
+              value={timelineZoom}
+              onChange={(event) => setTimelineZoom(Number(event.target.value))}
             />
-            <span>{zoom.toFixed(1)}x</span>
+            <span>{timelineZoom.toFixed(1)}x</span>
           </label>
         </header>
 
         <OverviewCards requests={visibleRequests} tasks={visibleTasks} anomalies={result.anomalies} />
         <ViewTabs activeView={activeView} onChange={setActiveView} />
 
-        {activeView === "process" && <ProcessSummaryView summaries={visibleSummaries} />}
+        {activeView === "process" && <ProcessSummaryView summaries={visibleSummaries} requests={visibleRequests} tasks={visibleTasks} />}
         {activeView === "requests" && (
           <RequestListView
             requests={visibleRequests}
@@ -166,9 +166,16 @@ export default function App() {
         )}
         {activeView === "requestTimeline" && (
           <RequestTimelineView
-            request={selectedRequest}
+            requests={visibleRequests}
             tasks={visibleTasks}
-            zoom={zoom}
+            initialZoom={timelineZoom}
+            selectedRequestId={selectedRequestId}
+            selectedTaskId={selectedTaskId}
+            onSelectRequest={(requestId) => {
+              setSelectedRequestId(requestId);
+              setSelectedTaskId(undefined);
+              setSelectedEventId(undefined);
+            }}
             onSelectTask={(taskId) => {
               if (visibleTaskIds.has(taskId)) {
                 setSelectedTaskId(taskId);
@@ -190,7 +197,8 @@ export default function App() {
         {activeView === "ucTimeline" && (
           <UCTaskTimelineView
             tasks={visibleTasks}
-            zoom={zoom}
+            initialZoom={timelineZoom}
+            selectedTaskId={selectedTaskId}
             onSelectTask={(taskId) => {
               setSelectedTaskId(taskId);
               setSelectedEventId(undefined);
