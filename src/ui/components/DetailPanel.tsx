@@ -90,6 +90,10 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
                 窗口: {formatTimestamp(batch.startMs)} ~ {formatTimestamp(batch.endMs)}
               </span>
               <span>lookup: {formatDuration(batch.lookupTotalMs)}</span>
+              <span>cache load: {formatDuration(batch.cacheLoadTotalMs)}</span>
+              <span>posix load: {formatDuration(batch.posixLoadTotalMs)}</span>
+              <span>cache dump: {formatDuration(batch.cacheDumpTotalMs)}</span>
+              <span>posix dump: {formatDuration(batch.posixDumpTotalMs)}</span>
             </div>
           ))}
           {relatedScheduleBatches.length === 0 ? <div className="detail-muted">没有关联到调度批次。</div> : null}

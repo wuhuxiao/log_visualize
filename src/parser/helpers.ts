@@ -37,7 +37,8 @@ export function buildRequestRef(message: string): RequestRef | undefined {
   const llmMatch =
     message.match(/llmMgrReqId[:=]\s*([0-9]+(?:\/\d+)?)/i) ??
     message.match(/request[_ ]?id[:=]\s*([0-9]+)(?![0-9a-f])/i) ??
-    message.match(/RequestId is\s*([0-9]+)/i);
+    message.match(/RequestId is\s*([0-9]+)/i) ??
+    message.match(/reqId is\s*([0-9]+)/i);
   const engineMatch = message.match(/EngineReqId[:=]\s*([a-zA-Z0-9]+)/i);
   const seqMatch = message.match(/seqId[:=]\s*([0-9]+)/i);
   const dpMatch = message.match(/DP RankId[:=]\s*([0-9]+)/i);

@@ -49,12 +49,14 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
 
   const lookupWindows = scheduleBatches.map((batch) => ({
     id: batch.id,
-    timeLabel: formatTimestamp(batch.endMs ?? batch.startMs),
+    timeLabel: formatTimestamp(batch.reporterMs ?? batch.executionEndMs ?? batch.endMs ?? batch.startMs),
     workerCount: batch.workerIds.length,
     requestCount: batch.requestIds.length,
     lookupCount: batch.lookupCount,
     lookupTotalMs: batch.lookupTotalMs,
-    schedulingRound: batch.schedulingRound ?? "n/a"
+    schedulingRound: batch.schedulingRound ?? "n/a",
+    cacheLoadTotalMs: batch.cacheLoadTotalMs,
+    posixLoadTotalMs: batch.posixLoadTotalMs
   }));
 
   return (
@@ -77,7 +79,7 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
       </div>
 
       <div className="chart-panel">
-        <h3>Response cost / batch lookup</h3>
+        <h3>Response cost and batch lookup</h3>
         <ResponsiveContainer width="100%" height={280}>
           <ComposedChart
             data={responseData}
@@ -99,7 +101,7 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
       </div>
 
       <div className="chart-panel">
-        <h3>每个调度批次的 Lookup 总耗时</h3>
+        <h3>Lookup totals per schedule batch</h3>
         <ResponsiveContainer width="100%" height={280}>
           <ComposedChart data={lookupWindows}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -117,7 +119,7 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
       </div>
 
       <div className="table-panel">
-        <h3>调度异常点</h3>
+        <h3>Scheduler response points</h3>
         <table className="data-table">
           <thead>
             <tr>
@@ -143,7 +145,7 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
       </div>
 
       <div className="table-panel">
-        <h3>调度批次与 Lookup 汇总</h3>
+        <h3>Schedule batch lookup summary</h3>
         <table className="data-table">
           <thead>
             <tr>
@@ -153,6 +155,8 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
               <th>request count</th>
               <th>lookup count</th>
               <th>lookup total</th>
+              <th>cache load</th>
+              <th>posix load</th>
             </tr>
           </thead>
           <tbody>
@@ -161,7 +165,7 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
                 key={row.id}
                 onClick={() => {
                   const batch = scheduleBatches.find((item) => item.id === row.id);
-                  const firstEventId = batch?.responseEventIds[0] ?? batch?.schedulingEventIds[0];
+                  const firstEventId = batch?.responseEventIds[0] ?? batch?.schedulingEventIds[0] ?? batch?.reporterEventId;
                   if (firstEventId) {
                     onSelectEvent(firstEventId);
                   }
@@ -173,6 +177,8 @@ export function SchedulerView({ events, scheduleBatches, onSelectEvent }: Schedu
                 <td>{row.requestCount}</td>
                 <td>{row.lookupCount}</td>
                 <td>{formatDuration(row.lookupTotalMs)}</td>
+                <td>{formatDuration(row.cacheLoadTotalMs)}</td>
+                <td>{formatDuration(row.posixLoadTotalMs)}</td>
               </tr>
             ))}
           </tbody>

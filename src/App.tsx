@@ -89,9 +89,11 @@ export default function App() {
         const pidOk = filters.pids.length === 0 || batch.pids.some((pid) => filters.pids.includes(pid));
         const dpOk = filters.dpRanks.length === 0 || batch.dpRanks.some((dpRank) => filters.dpRanks.includes(dpRank));
         const eventOk = filters.eventTypes.length === 0 || filters.eventTypes.includes("scheduler");
-        return workerOk && pidOk && dpOk && eventOk;
+        const requestOk =
+          visibleRequestIds.size === 0 || batch.requestIds.length === 0 || batch.requestIds.some((requestId) => visibleRequestIds.has(requestId));
+        return workerOk && pidOk && dpOk && eventOk && requestOk;
       }),
-    [filters, result.scheduleBatches]
+    [filters, result.scheduleBatches, visibleRequestIds]
   );
   const visibleSummaries = useMemo(
     () =>
@@ -183,6 +185,8 @@ export default function App() {
         {activeView === "requestTimeline" && (
           <RequestTimelineView
             requests={visibleRequests}
+            scheduleBatches={visibleScheduleBatches}
+            tasks={visibleTasks}
             initialZoom={timelineZoom}
             selectedRequestId={selectedRequestId}
             onSelectRequest={(requestId) => {

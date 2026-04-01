@@ -211,7 +211,11 @@ export interface PrefixCacheAssociation {
 export interface ScheduleBatch {
   id: string;
   schedulingRound?: number;
+  reporterEventId: string;
+  reporterMs?: number;
   startMs?: number;
+  computeStartMs?: number;
+  executionEndMs?: number;
   endMs?: number;
   workerIds: string[];
   pids: number[];
@@ -219,9 +223,23 @@ export interface ScheduleBatch {
   schedulingEventIds: string[];
   responseEventIds: string[];
   requestIds: string[];
+  taskIds: string[];
   lookupTaskIds: string[];
   lookupCount: number;
   lookupTotalMs: number;
+  lookupStartMs?: number;
+  lookupEndMs?: number;
+  lookupP50Ms?: number;
+  lookupP90Ms?: number;
+  lookupMaxMs?: number;
+  cacheLoadTaskIds: string[];
+  posixLoadTaskIds: string[];
+  cacheDumpTaskIds: string[];
+  posixDumpTaskIds: string[];
+  cacheLoadTotalMs: number;
+  posixLoadTotalMs: number;
+  cacheDumpTotalMs: number;
+  posixDumpTotalMs: number;
 }
 
 export interface AnalysisResult {
