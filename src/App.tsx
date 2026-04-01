@@ -50,23 +50,26 @@ export default function App() {
   const [selectedRequestId, setSelectedRequestId] = useState<string>();
   const [selectedTaskId, setSelectedTaskId] = useState<string>();
   const [selectedEventId, setSelectedEventId] = useState<string>();
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(2);
 
   useEffect(() => {
     loadSampleSources(["demo", "mixed-workers"]).then(setSources).catch(() => undefined);
   }, []);
 
   const result = useMemo(() => analyzeSources(sources), [sources]);
-  const workerIds = useMemo(
-    () => [...new Set(result.events.map((event) => event.workerId))].sort(),
-    [result.events]
-  );
+  const workerIds = useMemo(() => [...new Set(result.events.map((event) => event.workerId))].sort(), [result.events]);
   const pids = useMemo(
-    () => [...new Set(result.events.map((event) => event.pid).filter((pid): pid is number => pid !== undefined))].sort((a, b) => a - b),
+    () =>
+      [...new Set(result.events.map((event) => event.pid).filter((pid): pid is number => pid !== undefined))].sort(
+        (a, b) => a - b
+      ),
     [result.events]
   );
   const dpRanks = useMemo(
-    () => [...new Set(result.events.map((event) => event.requestRef?.dpRank).filter((rank): rank is number => rank !== undefined))].sort((a, b) => a - b),
+    () =>
+      [...new Set(result.events.map((event) => event.requestRef?.dpRank).filter((rank): rank is number => rank !== undefined))].sort(
+        (a, b) => a - b
+      ),
     [result.events]
   );
 
@@ -76,7 +79,10 @@ export default function App() {
   const visibleTasks = useMemo(() => filterUCTasks(result, filters, visibleRequestIds), [filters, result, visibleRequestIds]);
   const visibleTaskIds = useMemo(() => new Set(visibleTasks.map((task) => task.id)), [visibleTasks]);
   const visibleSummaries = useMemo(
-    () => result.processSummaries.filter((summary) => visibleTasks.some((task) => task.workerId === summary.workerId && task.category === summary.category)),
+    () =>
+      result.processSummaries.filter((summary) =>
+        visibleTasks.some((task) => task.workerId === summary.workerId && task.category === summary.category)
+      ),
     [result.processSummaries, visibleTasks]
   );
 
@@ -130,16 +136,16 @@ export default function App() {
             <p>统一解析多 worker 日志，联动查看请求生命周期、调度行为与 UC task 时间线。</p>
           </div>
           <label className="zoom-control">
-            时间轴缩放
+            时间线默认缩放
             <input
               type="range"
               min="1"
-              max="4"
-              step="0.25"
+              max="8"
+              step="0.5"
               value={zoom}
               onChange={(event) => setZoom(Number(event.target.value))}
             />
-            <span>{zoom.toFixed(2)}x</span>
+            <span>{zoom.toFixed(1)}x</span>
           </label>
         </header>
 
@@ -205,7 +211,12 @@ export default function App() {
         )}
       </main>
 
-      <DetailPanel result={result} selectedRequest={selectedRequest} selectedTask={selectedTask} selectedEvent={selectedEvent} />
+      <DetailPanel
+        result={result}
+        selectedRequest={selectedRequest}
+        selectedTask={selectedTask}
+        selectedEvent={selectedEvent}
+      />
     </div>
   );
 }
