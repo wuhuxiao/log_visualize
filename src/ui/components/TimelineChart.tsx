@@ -14,6 +14,7 @@ export interface TimelineItem {
   selected?: boolean;
   legendKey?: string;
   legendLabel?: string;
+  forceLabel?: boolean;
 }
 
 interface TimelineChartProps {
@@ -280,6 +281,7 @@ export function TimelineChart({
             const x = xFor(start);
             const barWidth = Math.max(4, xFor(end) - x || 0);
             const showInlineLabel = barWidth >= MIN_BAR_LABEL_WIDTH;
+            const showOutsideLabel = item.forceLabel && !showInlineLabel;
             const tooltip = [
               item.label,
               ...Object.entries(item.meta).map(([key, value]) => `${key}: ${value ?? "n/a"}`),
@@ -310,6 +312,11 @@ export function TimelineChart({
                 />
                 {showInlineLabel ? (
                   <text x={x + 6} y={y + 16} className="timeline-item-label">
+                    {item.label}
+                  </text>
+                ) : null}
+                {showOutsideLabel ? (
+                  <text x={Math.min(width - padding.right - 4, x + barWidth + 6)} y={y + 16} className="timeline-item-label">
                     {item.label}
                   </text>
                 ) : null}

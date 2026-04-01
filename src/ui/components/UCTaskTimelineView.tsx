@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { NormalizedUCTask } from "../../types/models";
 import { deriveAbstractUCTimelineSegments } from "../ucTimelineAbstraction";
+import { formatDuration } from "../../utils/time";
 import { TimelineChart, type TimelineItem } from "./TimelineChart";
 
 interface UCTaskTimelineViewProps {
@@ -53,9 +54,9 @@ export function UCTaskTimelineView({
       const isDump = task.category === "Dump" || task.category === "Cache2Backend";
       const color = task.category === "Lookup" ? "#6366f1" : isDump ? "#b45309" : "#0f766e";
       const bandwidth = formatBandwidth(bandwidthMBps(task));
-      const label = bandwidth
-        ? `${task.category} ${task.taskId ?? ""} ${bandwidth}`.trim()
-        : `${task.category} ${task.taskId ?? ""}`.trim();
+      const cost = formatDuration(task.costMs);
+      const labelParts = [task.category, task.taskId ?? "", cost, bandwidth].filter(Boolean);
+      const label = labelParts.join(" ");
 
       return {
         id: task.id,
@@ -65,6 +66,7 @@ export function UCTaskTimelineView({
         end: task.finishAt ?? task.startAt ?? task.dispatchAt,
         color,
         selected: task.id === selectedTaskId,
+        forceLabel: true,
         legendKey: `${task.ucKind}-${task.category}`,
         legendLabel: `${task.ucKind.toUpperCase()} / ${task.category}`,
         meta: {
