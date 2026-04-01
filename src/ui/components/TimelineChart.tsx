@@ -24,6 +24,7 @@ interface TimelineChartProps {
   initialZoom?: number;
   keyboardPanStepMs?: number;
   onItemClick?: (itemId: string) => void;
+  internalScroll?: boolean;
 }
 
 const MIN_BAR_LABEL_WIDTH = 84;
@@ -61,7 +62,8 @@ export function TimelineChart({
   items,
   initialZoom = 1,
   keyboardPanStepMs = DEFAULT_KEYBOARD_PAN_STEP_MS,
-  onItemClick
+  onItemClick,
+  internalScroll = true
 }: TimelineChartProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -128,11 +130,10 @@ export function TimelineChart({
     return [...grouped.entries()].map(([key, value]) => ({ key, ...value }));
   }, [items]);
 
-  const startLaneIndex = Math.max(0, Math.floor(scrollTop / LANE_HEIGHT) - OVERSCAN_LANES);
-  const endLaneIndex = Math.min(
-    lanes.length - 1,
-    Math.ceil((scrollTop + viewportHeight) / LANE_HEIGHT) + OVERSCAN_LANES
-  );
+  const startLaneIndex = internalScroll ? Math.max(0, Math.floor(scrollTop / LANE_HEIGHT) - OVERSCAN_LANES) : 0;
+  const endLaneIndex = internalScroll
+    ? Math.min(lanes.length - 1, Math.ceil((scrollTop + viewportHeight) / LANE_HEIGHT) + OVERSCAN_LANES)
+    : lanes.length - 1;
 
   const visibleItems = useMemo(
     () =>
@@ -253,8 +254,8 @@ export function TimelineChart({
 
       <div
         ref={viewportRef}
-        className="timeline-scroll"
-        onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+        className={`timeline-scroll${internalScroll ? "" : " no-internal-scroll"}`}
+        onScroll={internalScroll ? (event) => setScrollTop(event.currentTarget.scrollTop) : undefined}
       >
         <svg width={width} height={totalHeight} className="timeline-svg">
           {visibleLanes.map((lane) => {

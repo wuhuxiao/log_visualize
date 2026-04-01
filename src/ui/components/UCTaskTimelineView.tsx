@@ -116,6 +116,7 @@ export function UCTaskTimelineView({
       items={items}
       initialZoom={initialZoom}
       keyboardPanStepMs={keyboardPanStepMs}
+      internalScroll={false}
       onItemClick={(itemId) => {
         if (!itemId.startsWith("abstract:")) {
           onSelectTask(itemId);

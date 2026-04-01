@@ -372,6 +372,11 @@ button:hover {
   overflow: auto;
 }
 
+.timeline-scroll.no-internal-scroll {
+  max-height: none;
+  overflow: visible;
+}
+
 .timeline-svg {
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.8));
   border-radius: 12px;
