@@ -51,7 +51,9 @@ export function UCTaskTimelineView({
       meta: segment.meta
     }));
 
-    const taskItems: TimelineItem[] = tasks.map((task) => {
+    const taskItems: TimelineItem[] = tasks
+      .filter((task) => task.category !== "Lookup")
+      .map((task) => {
       const isDump = task.category === "Dump" || task.category === "Cache2Backend";
       const color = task.category === "Lookup" ? "#6366f1" : isDump ? "#b45309" : "#0f766e";
       const bandwidth = formatBandwidth(bandwidthMBps(task));
