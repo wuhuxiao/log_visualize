@@ -13,6 +13,22 @@ interface UCTaskTimelineViewProps {
   onSelectTask: (taskId: string) => void;
 }
 
+function taskLaneLabel(task: NormalizedUCTask) {
+  if (task.category === "Load") {
+    return `${task.workerId} / cache load`;
+  }
+  if (task.category === "Dump") {
+    return `${task.workerId} / cache dump`;
+  }
+  if (task.category === "Backend2Cache") {
+    return `${task.workerId} / posix load`;
+  }
+  if (task.category === "Cache2Backend") {
+    return `${task.workerId} / posix dump`;
+  }
+  return `${task.workerId} / ${task.ucKind}`;
+}
+
 function bandwidthMBps(task: NormalizedUCTask) {
   if (!task.bytes || !task.costMs || task.costMs <= 0) {
     return undefined;
@@ -63,7 +79,7 @@ export function UCTaskTimelineView({
 
         return {
           id: task.id,
-          lane: `${task.workerId} / ${task.ucKind}`,
+          lane: taskLaneLabel(task),
           label,
           start: task.dispatchAt ?? task.startAt ?? task.finishAt,
           end: task.finishAt ?? task.startAt ?? task.dispatchAt,
