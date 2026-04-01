@@ -25,6 +25,15 @@ interface RequestTaskListItem {
 }
 
 const PAGE_SIZE = 10;
+const REQUEST_TASK_CATEGORIES = [
+  { key: "Lookup", summaryKey: "lookup", label: "Lookup" },
+  { key: "Cache Load", summaryKey: "cacheLoad", label: "Cache load" },
+  { key: "Posix Load", summaryKey: "posixLoad", label: "Posix load" },
+  { key: "Cache Dump", summaryKey: "cacheDump", label: "Cache dump" },
+  { key: "Posix Dump", summaryKey: "posixDump", label: "Posix dump" }
+] as const;
+
+type RequestTaskCategory = RequestTaskListItem["category"];
 
 function renderAnomalies(anomalies: AnomalyRecord[]) {
   if (anomalies.length === 0) {
@@ -50,6 +59,7 @@ function formatBandwidth(task: NormalizedUCTask) {
 
 export function DetailPanel({ result, selectedRequest, selectedTask, selectedEvent }: DetailPanelProps) {
   const [taskPage, setTaskPage] = useState(1);
+  const [selectedTaskCategory, setSelectedTaskCategory] = useState<RequestTaskCategory | "All">("All");
 
   const schedulingEvents = useMemo(
     () =>
@@ -112,13 +122,18 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
 
   useEffect(() => {
     setTaskPage(1);
+    setSelectedTaskCategory("All");
   }, [selectedRequest?.id]);
 
   if (selectedRequest && requestDetail) {
-    const totalPages = Math.max(1, Math.ceil(requestDetail.taskRows.length / PAGE_SIZE));
+    const filteredTaskRows =
+      selectedTaskCategory === "All"
+        ? requestDetail.taskRows
+        : requestDetail.taskRows.filter((item) => item.category === selectedTaskCategory);
+    const totalPages = Math.max(1, Math.ceil(filteredTaskRows.length / PAGE_SIZE));
     const currentPage = Math.min(taskPage, totalPages);
     const startIndex = (currentPage - 1) * PAGE_SIZE;
-    const pagedTasks = requestDetail.taskRows.slice(startIndex, startIndex + PAGE_SIZE);
+    const pagedTasks = filteredTaskRows.slice(startIndex, startIndex + PAGE_SIZE);
 
     return (
       <aside className="detail-panel">
@@ -153,31 +168,39 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
 
         <h3>Related UC Task Summary</h3>
         <div className="detail-summary-grid">
-          <div className="detail-card compact">
-            <strong>Lookup</strong>
-            <span>{requestDetail.categorySummary.lookup} tasks</span>
-          </div>
-          <div className="detail-card compact">
-            <strong>Cache load</strong>
-            <span>{requestDetail.categorySummary.cacheLoad} tasks</span>
-          </div>
-          <div className="detail-card compact">
-            <strong>Posix load</strong>
-            <span>{requestDetail.categorySummary.posixLoad} tasks</span>
-          </div>
-          <div className="detail-card compact">
-            <strong>Cache dump</strong>
-            <span>{requestDetail.categorySummary.cacheDump} tasks</span>
-          </div>
-          <div className="detail-card compact">
-            <strong>Posix dump</strong>
-            <span>{requestDetail.categorySummary.posixDump} tasks</span>
-          </div>
+          <button
+            type="button"
+            className={`detail-card compact detail-summary-button ${selectedTaskCategory === "All" ? "active" : ""}`}
+            onClick={() => {
+              setSelectedTaskCategory("All");
+              setTaskPage(1);
+            }}
+          >
+            <strong>All</strong>
+            <span>{requestDetail.taskRows.length} tasks</span>
+          </button>
+          {REQUEST_TASK_CATEGORIES.map((category) => (
+            <button
+              key={category.key}
+              type="button"
+              className={`detail-card compact detail-summary-button ${
+                selectedTaskCategory === category.key ? "active" : ""
+              }`}
+              onClick={() => {
+                setSelectedTaskCategory((current) => (current === category.key ? "All" : category.key));
+                setTaskPage(1);
+              }}
+            >
+              <strong>{category.label}</strong>
+              <span>{requestDetail.categorySummary[category.summaryKey]} tasks</span>
+            </button>
+          ))}
         </div>
 
         <h3>UC Task List</h3>
         <div className="detail-pagination">
           <span>
+            {selectedTaskCategory === "All" ? "All task types" : selectedTaskCategory} ·{" "}
             Page {currentPage} / {totalPages}
           </span>
           <div className="detail-pagination-actions">
@@ -212,7 +235,9 @@ export function DetailPanel({ result, selectedRequest, selectedTask, selectedEve
               <span>Paired posix: {item.task.pairedPosixTaskId ?? "n/a"}</span>
             </div>
           ))}
-          {requestDetail.taskRows.length === 0 ? <div className="detail-muted">No related UC tasks for this request.</div> : null}
+          {filteredTaskRows.length === 0 ? (
+            <div className="detail-muted">No related UC tasks for the selected task type.</div>
+          ) : null}
         </div>
 
         <h3>Related Schedule Batches</h3>

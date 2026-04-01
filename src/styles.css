@@ -426,6 +426,16 @@ button:hover {
   gap: 10px;
 }
 
+.detail-summary-button {
+  width: 100%;
+  text-align: left;
+}
+
+.detail-summary-button.active {
+  border-color: #3b82f6;
+  background: rgba(30, 64, 175, 0.24);
+}
+
 .detail-pagination {
   display: flex;
   align-items: center;
