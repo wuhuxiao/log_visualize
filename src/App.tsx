@@ -53,7 +53,7 @@ export default function App() {
   const [selectedRequestId, setSelectedRequestId] = useState<string>();
   const [selectedTaskId, setSelectedTaskId] = useState<string>();
   const [selectedEventId, setSelectedEventId] = useState<string>();
-  const [timelineZoom, setTimelineZoom] = useState(2);
+  const [timelineZoom, setTimelineZoom] = useState(1);
   const [keyboardPanStepSec, setKeyboardPanStepSec] = useState(1);
 
   useEffect(() => {

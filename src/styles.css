@@ -277,23 +277,40 @@ button:hover {
   border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 14px;
   padding: 14px;
+  overflow: hidden;
+}
+
+.timeline-shell:focus {
+  outline: 1px solid rgba(59, 130, 246, 0.45);
+  outline-offset: 0;
 }
 
 .timeline-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
 .timeline-title {
   font-size: 15px;
   font-weight: 600;
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 .timeline-controls {
   display: flex;
   gap: 8px;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.timeline-controls button {
+  white-space: nowrap;
 }
 
 .timeline-meta {
