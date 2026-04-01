@@ -15,6 +15,7 @@ export interface TimelineItem {
   legendKey?: string;
   legendLabel?: string;
   forceLabel?: boolean;
+  forceLabelSide?: "left" | "right";
 }
 
 interface TimelineChartProps {
@@ -316,7 +317,16 @@ export function TimelineChart({
                   </text>
                 ) : null}
                 {showOutsideLabel ? (
-                  <text x={Math.min(width - padding.right - 4, x + barWidth + 6)} y={y + 16} className="timeline-item-label">
+                  <text
+                    x={
+                      item.forceLabelSide === "left"
+                        ? Math.max(padding.left + 4, x - 6)
+                        : Math.min(width - padding.right - 4, x + barWidth + 6)
+                    }
+                    y={y + 16}
+                    textAnchor={item.forceLabelSide === "left" ? "end" : "start"}
+                    className="timeline-item-label"
+                  >
                     {item.label}
                   </text>
                 ) : null}
