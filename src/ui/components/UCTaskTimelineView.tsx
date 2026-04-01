@@ -4,6 +4,7 @@ import { TimelineChart, type TimelineItem } from "./TimelineChart";
 interface UCTaskTimelineViewProps {
   tasks: NormalizedUCTask[];
   initialZoom?: number;
+  keyboardPanStepMs?: number;
   selectedTaskId?: string;
   onSelectTask: (taskId: string) => void;
 }
@@ -25,12 +26,20 @@ function formatBandwidth(value?: number) {
   return `${value.toFixed(1)} MB/s`;
 }
 
-export function UCTaskTimelineView({ tasks, initialZoom = 2, selectedTaskId, onSelectTask }: UCTaskTimelineViewProps) {
+export function UCTaskTimelineView({
+  tasks,
+  initialZoom = 2,
+  keyboardPanStepMs = 1_000,
+  selectedTaskId,
+  onSelectTask
+}: UCTaskTimelineViewProps) {
   const items: TimelineItem[] = tasks.map((task) => {
     const isDump = task.category === "Dump" || task.category === "Cache2Backend";
     const color = task.category === "Lookup" ? "#6366f1" : isDump ? "#b45309" : "#0f766e";
     const bandwidth = formatBandwidth(bandwidthMBps(task));
-    const label = bandwidth ? `${task.category} ${task.taskId ?? ""} ${bandwidth}`.trim() : `${task.category} ${task.taskId ?? ""}`.trim();
+    const label = bandwidth
+      ? `${task.category} ${task.taskId ?? ""} ${bandwidth}`.trim()
+      : `${task.category} ${task.taskId ?? ""}`.trim();
 
     return {
       id: task.id,
@@ -60,5 +69,13 @@ export function UCTaskTimelineView({ tasks, initialZoom = 2, selectedTaskId, onS
     };
   });
 
-  return <TimelineChart title="Cache / Posix / Lookup 生命周期" items={items} initialZoom={initialZoom} onItemClick={onSelectTask} />;
+  return (
+    <TimelineChart
+      title="Cache / Posix / Lookup 生命周期"
+      items={items}
+      initialZoom={initialZoom}
+      keyboardPanStepMs={keyboardPanStepMs}
+      onItemClick={onSelectTask}
+    />
+  );
 }

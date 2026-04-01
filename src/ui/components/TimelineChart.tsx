@@ -20,6 +20,7 @@ interface TimelineChartProps {
   title: string;
   items: TimelineItem[];
   initialZoom?: number;
+  keyboardPanStepMs?: number;
   onItemClick?: (itemId: string) => void;
 }
 
@@ -28,8 +29,8 @@ const MAX_ZOOM = 64;
 const LANE_HEIGHT = 34;
 const OVERSCAN_LANES = 10;
 const DEFAULT_VIEWPORT_HEIGHT = 720;
-const KEYBOARD_PAN_STEP = 0.08;
-const KEYBOARD_PAN_STEP_LARGE = 0.2;
+const DEFAULT_KEYBOARD_PAN_STEP_MS = 1_000;
+const KEYBOARD_PAN_LARGE_STEP_MULTIPLIER = 5;
 
 function getItemRange(items: TimelineItem[]) {
   let min = Number.POSITIVE_INFINITY;
@@ -53,7 +54,13 @@ function getItemRange(items: TimelineItem[]) {
   return { min, max: max <= min ? min + 1 : max };
 }
 
-export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: TimelineChartProps) {
+export function TimelineChart({
+  title,
+  items,
+  initialZoom = 1,
+  keyboardPanStepMs = DEFAULT_KEYBOARD_PAN_STEP_MS,
+  onItemClick
+}: TimelineChartProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -150,11 +157,12 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
   };
 
   const handleKeyboardPan = (direction: "left" | "right", largeStep = false) => {
-    if (zoom <= 1.001) {
+    if (zoom <= 1.001 || maxPanSpan <= 0) {
       return;
     }
-    const step = largeStep ? KEYBOARD_PAN_STEP_LARGE : KEYBOARD_PAN_STEP;
-    const delta = direction === "left" ? -step : step;
+    const stepMs = Math.max(1, keyboardPanStepMs) * (largeStep ? KEYBOARD_PAN_LARGE_STEP_MULTIPLIER : 1);
+    const stepPan = stepMs / maxPanSpan;
+    const delta = direction === "left" ? -stepPan : stepPan;
     setPan((current) => clamp(current + delta, 0, 1));
   };
 
@@ -210,7 +218,10 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
         </span>
         <span>缩放: {zoom.toFixed(2)}x</span>
         <span>显示 lane: {Math.max(0, endLaneIndex - startLaneIndex + 1)} / {lanes.length}</span>
-        <span>← / → 平移，Shift + ← / → 快速平移</span>
+        <span>
+          ← / → 平移 {Math.max(1, keyboardPanStepMs) / 1000}s，Shift + ← / → 平移{" "}
+          {(Math.max(1, keyboardPanStepMs) * KEYBOARD_PAN_LARGE_STEP_MULTIPLIER) / 1000}s
+        </span>
       </div>
 
       <div className="timeline-legend">

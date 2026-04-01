@@ -51,6 +51,7 @@ export default function App() {
   const [selectedTaskId, setSelectedTaskId] = useState<string>();
   const [selectedEventId, setSelectedEventId] = useState<string>();
   const [timelineZoom, setTimelineZoom] = useState(2);
+  const [keyboardPanStepSec, setKeyboardPanStepSec] = useState(1);
 
   useEffect(() => {
     loadSampleSources(["demo", "mixed-workers"]).then(setSources).catch(() => undefined);
@@ -153,18 +154,31 @@ export default function App() {
             <h1>LLM / UC 日志分析与可视化</h1>
             <p>统一解析多 worker 日志，联动查看请求生命周期、调度行为与 UC task 时间线。</p>
           </div>
-          <label className="zoom-control">
-            时间线默认缩放
-            <input
-              type="range"
-              min="1"
-              max="64"
-              step="0.5"
-              value={timelineZoom}
-              onChange={(event) => setTimelineZoom(Number(event.target.value))}
-            />
-            <span>{timelineZoom.toFixed(1)}x</span>
-          </label>
+          <div className="zoom-control">
+            <label>
+              时间线默认缩放
+              <input
+                type="range"
+                min="1"
+                max="64"
+                step="0.5"
+                value={timelineZoom}
+                onChange={(event) => setTimelineZoom(Number(event.target.value))}
+              />
+              <span>{timelineZoom.toFixed(1)}x</span>
+            </label>
+            <label>
+              键盘滑动步长
+              <input
+                type="number"
+                min="0.1"
+                step="0.1"
+                value={keyboardPanStepSec}
+                onChange={(event) => setKeyboardPanStepSec(Math.max(0.1, Number(event.target.value) || 1))}
+              />
+              <span>{keyboardPanStepSec.toFixed(1)}s</span>
+            </label>
+          </div>
         </header>
 
         <OverviewCards requests={visibleRequests} tasks={visibleTasks} events={visibleEvents} />
@@ -189,6 +203,7 @@ export default function App() {
             tasks={visibleTasks}
             events={visibleEvents}
             initialZoom={timelineZoom}
+            keyboardPanStepMs={keyboardPanStepSec * 1000}
             selectedRequestId={selectedRequestId}
             onSelectRequest={(requestId) => {
               setSelectedRequestId(requestId);
@@ -212,6 +227,7 @@ export default function App() {
           <UCTaskTimelineView
             tasks={visibleTasks}
             initialZoom={timelineZoom}
+            keyboardPanStepMs={keyboardPanStepSec * 1000}
             selectedTaskId={selectedTaskId}
             onSelectTask={(taskId) => {
               setSelectedTaskId(taskId);

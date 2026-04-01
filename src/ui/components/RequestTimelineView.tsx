@@ -8,6 +8,7 @@ interface RequestTimelineViewProps {
   tasks: NormalizedUCTask[];
   events: ParsedEvent[];
   initialZoom?: number;
+  keyboardPanStepMs?: number;
   selectedRequestId?: string;
   onSelectRequest: (requestId: string) => void;
 }
@@ -115,6 +116,7 @@ export function RequestTimelineView({
   tasks,
   events,
   initialZoom = 2,
+  keyboardPanStepMs = 1_000,
   selectedRequestId,
   onSelectRequest
 }: RequestTimelineViewProps) {
@@ -549,6 +551,7 @@ export function RequestTimelineView({
       title="Request + Scheduling Execution Timeline"
       items={items}
       initialZoom={initialZoom}
+      keyboardPanStepMs={keyboardPanStepMs}
       onItemClick={(itemId) => {
         if (itemId.startsWith("request:")) {
           const requestId = itemId.split(":")[1];
