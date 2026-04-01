@@ -8,7 +8,11 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { buildRequestPhaseSummaries, buildWorkerBandwidthSummaries } from "../../aggregations/derivedMetrics";
+import {
+  buildRequestPhaseSummaries,
+  buildWorkerBandwidthSummaries,
+  buildWorkerPosixBandwidthSummaries
+} from "../../aggregations/derivedMetrics";
 import type { NormalizedRequest, NormalizedUCTask, ProcessTaskSummary } from "../../types/models";
 import { formatDuration } from "../../utils/time";
 
@@ -36,6 +40,7 @@ interface ProcessSummaryViewProps {
 export function ProcessSummaryView({ summaries, requests, tasks }: ProcessSummaryViewProps) {
   const phaseSummaries = buildRequestPhaseSummaries(requests);
   const bandwidthSummaries = buildWorkerBandwidthSummaries(tasks);
+  const posixBandwidthSummaries = buildWorkerPosixBandwidthSummaries(tasks);
 
   return (
     <div className="view-grid">
@@ -77,7 +82,7 @@ export function ProcessSummaryView({ summaries, requests, tasks }: ProcessSummar
       </div>
 
       <div className="chart-panel">
-        <h3>各进程 Load / Dump 带宽</h3>
+        <h3>Cache Load / Dump 带宽</h3>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={bandwidthSummaries}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -92,6 +97,29 @@ export function ProcessSummaryView({ summaries, requests, tasks }: ProcessSummar
                 <Cell
                   key={`${summary.workerId}:${summary.category}`}
                   fill={summary.category === "Load" ? "#2563eb" : "#0f766e"}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="chart-panel">
+        <h3>Posix 纯后端读写带宽</h3>
+        <ResponsiveContainer width="100%" height={320}>
+          <BarChart data={posixBandwidthSummaries}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+            <XAxis dataKey="workerId" stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" />
+            <Tooltip
+              formatter={(value: number) => formatBandwidth(value)}
+              contentStyle={{ background: "#101827", border: "1px solid #334155" }}
+            />
+            <Bar dataKey="avgMBps">
+              {posixBandwidthSummaries.map((summary) => (
+                <Cell
+                  key={`${summary.workerId}:${summary.direction}`}
+                  fill={summary.direction === "Backend2Cache" ? "#d97706" : "#b45309"}
                 />
               ))}
             </Bar>
@@ -134,7 +162,7 @@ export function ProcessSummaryView({ summaries, requests, tasks }: ProcessSummar
       </div>
 
       <div className="table-panel">
-        <h3>Load / Dump 带宽统计</h3>
+        <h3>Cache Load / Dump 带宽统计</h3>
         <table className="data-table">
           <thead>
             <tr>
@@ -152,6 +180,36 @@ export function ProcessSummaryView({ summaries, requests, tasks }: ProcessSummar
               <tr key={`${summary.workerId}:${summary.category}`}>
                 <td>{summary.workerId}</td>
                 <td>{summary.category}</td>
+                <td>{summary.count}</td>
+                <td>{formatBandwidth(summary.avgMBps)}</td>
+                <td>{formatBandwidth(summary.p50MBps)}</td>
+                <td>{formatBandwidth(summary.p90MBps)}</td>
+                <td>{formatBandwidth(summary.maxMBps)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="table-panel">
+        <h3>Posix 纯后端读写带宽统计</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>worker</th>
+              <th>direction</th>
+              <th>count</th>
+              <th>avg</th>
+              <th>p50</th>
+              <th>p90</th>
+              <th>max</th>
+            </tr>
+          </thead>
+          <tbody>
+            {posixBandwidthSummaries.map((summary) => (
+              <tr key={`${summary.workerId}:${summary.direction}`}>
+                <td>{summary.workerId}</td>
+                <td>{summary.direction}</td>
                 <td>{summary.count}</td>
                 <td>{formatBandwidth(summary.avgMBps)}</td>
                 <td>{formatBandwidth(summary.p50MBps)}</td>

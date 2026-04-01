@@ -21,6 +21,17 @@ export interface WorkerBandwidthSummary {
   maxMBps: number;
 }
 
+export interface WorkerPosixBandwidthSummary {
+  workerId: string;
+  pid?: number;
+  direction: "Backend2Cache" | "Cache2Backend";
+  count: number;
+  avgMBps: number;
+  p50MBps: number;
+  p90MBps: number;
+  maxMBps: number;
+}
+
 export interface SchedulerLookupSummary {
   id: string;
   workerId: string;
@@ -96,6 +107,52 @@ export function buildWorkerBandwidthSummaries(tasks: NormalizedUCTask[]): Worker
     workerId: entry.workerId,
     pid: entry.pid,
     category: entry.category,
+    count: entry.values.length,
+    avgMBps: average(entry.values),
+    p50MBps: quantile(entry.values, 0.5),
+    p90MBps: quantile(entry.values, 0.9),
+    maxMBps: Math.max(...entry.values)
+  }));
+}
+
+export function buildWorkerPosixBandwidthSummaries(tasks: NormalizedUCTask[]): WorkerPosixBandwidthSummary[] {
+  const grouped = new Map<
+    string,
+    {
+      workerId: string;
+      pid?: number;
+      direction: "Backend2Cache" | "Cache2Backend";
+      values: number[];
+    }
+  >();
+
+  tasks.forEach((task) => {
+    if (
+      task.ucKind !== "posix" ||
+      (task.direction !== "Backend2Cache" && task.direction !== "Cache2Backend") ||
+      !task.bytes ||
+      !task.costMs ||
+      task.costMs <= 0
+    ) {
+      return;
+    }
+
+    const bandwidthMBps = task.bytes / 1024 / 1024 / (task.costMs / 1000);
+    const key = `${task.workerId}:${task.direction}`;
+    const entry = grouped.get(key) ?? {
+      workerId: task.workerId,
+      pid: task.pid,
+      direction: task.direction,
+      values: []
+    };
+    entry.values.push(bandwidthMBps);
+    grouped.set(key, entry);
+  });
+
+  return [...grouped.values()].map((entry) => ({
+    workerId: entry.workerId,
+    pid: entry.pid,
+    direction: entry.direction,
     count: entry.values.length,
     avgMBps: average(entry.values),
     p50MBps: quantile(entry.values, 0.5),
