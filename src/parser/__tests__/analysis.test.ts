@@ -50,6 +50,27 @@ const scheduledBatchSource: LogSource = {
   ].join("\n")
 };
 
+const multiBatchBindingSource: LogSource = {
+  id: "multi-batch-binding",
+  name: "multi-batch-binding.log",
+  text: [
+    "[2026-03-31 17:10:10.000111] [901] [1101] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 30001",
+    "[2026-03-31 17:10:10.000512] [901] [1101] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 0, Add request(llmMgrReqId: 30001/0, EngineReqId: eng30001, seqId: 401) successfully. Total added request num is:1",
+    "[2026-03-31 17:10:10.010120] [901] [1102] [llm] [INFO] [scheduler.cpp:229] [Scheduler|Schedule-scheduling] DP RankId: 0. After Backfill, running size:1; waiting size: 1; swapped size:0; batch size:1; transferring size:1; schedule forwardMode:0; PD PriorityType:0",
+    "[2026-03-31 17:10:10,020] [1901] [281470442199168] [llm] [INFO] [prefix_cache_plugin.py-169] : Prefix Cache Reporter: #batchsize: 1, #batched-tokens: 8192, #local cached-tokens: 0, #local cache hit rate: 0.0%, #remote cached-tokens: 0, #remote cache hit rate: 0.0%, #cache hit rate: 0.0%",
+    "[2026-03-31 17:10:10.025015] [901] [1104] [server] [INFO] [prefill_wrapper.cpp:194] [endpoint] Finish decode tokenIds. RequestId is 30001",
+    "[2026-03-31 17:10:10.027620] [901] [1106] [server] [INFO] [infer_backend_manager.cpp:402] [infer_backend_manager] Backendmanager control request successfully, RequestId is 30001",
+    "[2026-03-31 17:10:10.028694] [901] [1106] [llm] [INFO] [llm_engine.cpp:236] [LlmEngine] DP RankId: 0. Send Release KV response(EngineReqId: eng30001) successfully.",
+    "[2026-03-31 17:10:10.030111] [901] [1101] [llm] [INFO] [llm_manager_impl.cpp:1514] Get a new inferRequest from server, llmMgrReqId: 30002",
+    "[2026-03-31 17:10:10.030512] [901] [1101] [llm] [INFO] [llm_engine.cpp:143] [LlmEngine|Request-Enter Waiting] DP RankId: 0, Add request(llmMgrReqId: 30002/0, EngineReqId: eng30002, seqId: 402) successfully. Total added request num is:1",
+    "[2026-03-31 17:10:10.040120] [901] [1102] [llm] [INFO] [scheduler.cpp:229] [Scheduler|Schedule-scheduling] DP RankId: 0. After Backfill, running size:1; waiting size: 1; swapped size:0; batch size:1; transferring size:1; schedule forwardMode:0; PD PriorityType:0",
+    "[2026-03-31 17:10:10,050] [1901] [281470442199168] [llm] [INFO] [prefix_cache_plugin.py-169] : Prefix Cache Reporter: #batchsize: 1, #batched-tokens: 8192, #local cached-tokens: 0, #local cache hit rate: 0.0%, #remote cached-tokens: 0, #remote cache hit rate: 0.0%, #cache hit rate: 0.0%",
+    "[2026-03-31 17:10:10.055015] [901] [1104] [server] [INFO] [prefill_wrapper.cpp:194] [endpoint] Finish decode tokenIds. RequestId is 30002",
+    "[2026-03-31 17:10:10.059620] [901] [1106] [server] [INFO] [infer_backend_manager.cpp:402] [infer_backend_manager] Backendmanager control request successfully, RequestId is 30002",
+    "[2026-03-31 17:10:10.060694] [901] [1106] [llm] [INFO] [llm_engine.cpp:236] [LlmEngine] DP RankId: 0. Send Release KV response(EngineReqId: eng30002) successfully."
+  ].join("\n")
+};
+
 describe("parseSources", () => {
   it("parses multiple event families from heterogeneous log formats", () => {
     const { events } = parseSources([baseSource]);
@@ -115,5 +136,19 @@ describe("analyzeSources", () => {
 
     expect(request?.anomalies.some((anomaly) => anomaly.type === "low_cache_bandwidth")).toBe(true);
     expect(request?.anomalies.some((anomaly) => anomaly.type === "slow_model_compute")).toBe(true);
+  });
+
+  it("binds each request to the nearest previous schedule batch before kv transfer", () => {
+    const result = analyzeSources([multiBatchBindingSource]);
+    const request1 = result.requests.find((request) => request.llmMgrReqId === "30001");
+    const request2 = result.requests.find((request) => request.llmMgrReqId === "30002");
+    const batch1 = result.scheduleBatches[0];
+    const batch2 = result.scheduleBatches[1];
+
+    expect(result.scheduleBatches).toHaveLength(2);
+    expect(request1?.relatedScheduleBatchIds).toEqual([batch1?.id]);
+    expect(request2?.relatedScheduleBatchIds).toEqual([batch2?.id]);
+    expect(batch1?.requestIds).toContain(request1?.id);
+    expect(batch2?.requestIds).toContain(request2?.id);
   });
 });

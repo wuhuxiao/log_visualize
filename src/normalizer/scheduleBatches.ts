@@ -19,10 +19,6 @@ function getTaskEnd(task: NormalizedUCTask): number | undefined {
   return task.finishAt ?? task.startAt ?? task.dispatchAt;
 }
 
-function getRequestStart(request: NormalizedRequest): number | undefined {
-  return request.stages.enteredAt ?? request.stages.addedAt ?? request.stages.insertedAt;
-}
-
 function getRequestEnd(request: NormalizedRequest): number | undefined {
   return (
     request.stages.endedAt ??
@@ -130,53 +126,54 @@ function buildTaskStats(tasks: NormalizedUCTask[]) {
   };
 }
 
-function pickRequestCandidates(
-  requests: NormalizedRequest[],
-  reporter: PrefixCacheEvent,
-  reporterMs: number,
-  nextReporterMs: number | undefined
-) {
-  const batchSizeValue = reporter.extracted.batchSize;
-  const batchSize = typeof batchSizeValue === "number" && batchSizeValue > 0 ? batchSizeValue : undefined;
-  const releaseWindowEnd = nextReporterMs ?? reporterMs + REQUEST_BATCH_GAP_MS;
+function requestKvTransferAnchor(request: NormalizedRequest) {
+  return (
+    request.stages.decodeFinishedAt ??
+    request.stages.prefillCompleteAt ??
+    request.stages.controlRequestAt ??
+    request.stages.releaseResponseAt ??
+    request.stages.kvReleaseAt ??
+    getRequestEnd(request)
+  );
+}
 
-  const candidates = requests
-    .map((request) => {
-      const requestStart = getRequestStart(request);
-      const requestEnd = getRequestEnd(request);
-      const releaseAnchor = request.stages.kvReleaseAt ?? request.stages.releaseResponseAt ?? request.stages.endedAt;
-      const phaseAnchor =
-        releaseAnchor ??
-        request.stages.prefillCompleteAt ??
-        request.stages.decodeFinishedAt ??
-        requestEnd;
+function batchAssignmentAnchor(batch: ScheduleBatch) {
+  return batch.reporterMs ?? batch.executionEndMs ?? batch.startMs ?? batch.endMs;
+}
 
-      return {
-        request,
-        requestStart,
-        requestEnd,
-        releaseAnchor,
-        phaseAnchor
-      };
-    })
-    .filter(({ requestStart, phaseAnchor }) => {
-      if (phaseAnchor === undefined) {
-        return false;
-      }
-
-      if (requestStart !== undefined && requestStart > reporterMs) {
-        return false;
-      }
-
-      return phaseAnchor >= reporterMs && phaseAnchor < releaseWindowEnd;
-    })
-    .sort((left, right) => (left.phaseAnchor ?? Number.MAX_SAFE_INTEGER) - (right.phaseAnchor ?? Number.MAX_SAFE_INTEGER));
-
-  if (!batchSize || candidates.length <= batchSize) {
-    return candidates.map(({ request }) => request);
+function assignRequestsToBatches(requests: NormalizedRequest[], batches: ScheduleBatch[]) {
+  for (const request of requests) {
+    request.relatedScheduleBatchIds = [];
   }
 
-  return candidates.slice(0, batchSize).map(({ request }) => request);
+  for (const batch of batches) {
+    batch.requestIds = [];
+  }
+
+  for (const request of requests) {
+    const kvTransferAnchor = requestKvTransferAnchor(request);
+    if (kvTransferAnchor === undefined) {
+      continue;
+    }
+
+    const chosenBatch = batches
+      .filter((batch) => {
+        const anchor = batchAssignmentAnchor(batch);
+        return anchor !== undefined && anchor <= kvTransferAnchor;
+      })
+      .sort(
+        (left, right) =>
+          (batchAssignmentAnchor(right) ?? Number.NEGATIVE_INFINITY) -
+          (batchAssignmentAnchor(left) ?? Number.NEGATIVE_INFINITY)
+      )[0];
+
+    if (!chosenBatch) {
+      continue;
+    }
+
+    chosenBatch.requestIds.push(request.id);
+    request.relatedScheduleBatchIds = [chosenBatch.id];
+  }
 }
 
 export function correlateScheduleBatches(
@@ -215,10 +212,8 @@ export function correlateScheduleBatches(
     const previousReporterMs = prefixReporters[index - 1]?.timestampMs;
     const nextReporterMs = prefixReporters[index + 1]?.timestampMs;
 
-    const requestIds = pickRequestCandidates(requests, reporter, reporterMs, nextReporterMs);
-    const dpRanks = uniqueSortedNumbers(requestIds.map((request) => request.dpRank));
-
-    const matchedSchedulingEvents = matchSchedulingEvents(schedulingEvents, reporterMs, previousReporterMs, dpRanks);
+    const matchedSchedulingEvents = matchSchedulingEvents(schedulingEvents, reporterMs, previousReporterMs, []);
+    const provisionalDpRanks = uniqueSortedNumbers(matchedSchedulingEvents.map((event) => event.requestRef?.dpRank));
 
     const preStartCandidates = [
       ...matchedSchedulingEvents.map((event) => event.timestampMs),
@@ -231,17 +226,6 @@ export function correlateScheduleBatches(
     const startMs = preStartCandidates
       .filter((time) => time >= startBoundary && reporterMs - time <= EVENT_MATCH_WINDOW_MS)
       .reduce<number | undefined>((min, value) => (min === undefined ? value : Math.min(min, value)), undefined) ?? reporterMs;
-
-    const requestEndAnchors = requestIds
-      .map((request) => getRequestEnd(request))
-      .filter((value): value is number => value !== undefined);
-
-    const provisionalEndMs = requestEndAnchors.reduce<number | undefined>(
-      (max, value) => (max === undefined ? value : Math.max(max, value)),
-      undefined
-    ) ?? reporterMs;
-
-    const loadWindowEnd = Math.max(reporterMs, provisionalEndMs);
 
     const batchLookupTasks = lookupTasks.filter((task) => {
       const taskStart = getTaskStart(task);
@@ -297,16 +281,29 @@ export function correlateScheduleBatches(
     const dumpEndCandidates = [
       ...batchCacheDumpTasks.map((task) => getTaskEnd(task)),
       ...batchPosixDumpTasks.map((task) => getTaskEnd(task)),
-      provisionalEndMs
+      ...responseEvents
+        .map((event) => event.timestampMs)
+        .filter((value): value is number => value !== undefined && value >= reporterMs && value <= postReporterWindowEnd),
+      reporterMs
     ].filter((value): value is number => value !== undefined);
 
     const endMs =
       dumpEndCandidates.reduce<number | undefined>(
         (max, value) => (max === undefined ? value : Math.max(max, value)),
         undefined
-      ) ?? provisionalEndMs;
+      ) ?? reporterMs;
 
-    const matchedResponseEvents = matchResponseEvents(responseEvents, reporterMs, endMs, nextReporterMs, dpRanks);
+    const matchedResponseEvents = matchResponseEvents(
+      responseEvents,
+      reporterMs,
+      endMs,
+      nextReporterMs,
+      provisionalDpRanks
+    );
+    const dpRanks = uniqueSortedNumbers([
+      ...provisionalDpRanks,
+      ...matchedResponseEvents.map((event) => event.requestRef?.dpRank)
+    ]);
     const lookupStats = buildTaskStats(batchLookupTasks);
     const cacheLoadStats = buildTaskStats(batchCacheLoadTasks);
     const posixLoadStats = buildTaskStats(batchPosixLoadTasks);
@@ -334,7 +331,6 @@ export function correlateScheduleBatches(
 
     const workerIds = uniqueSortedStrings([
       reporter.workerId,
-      ...requestIds.flatMap((request) => request.workerIds),
       ...matchedSchedulingEvents.map((event) => event.workerId),
       ...matchedResponseEvents.map((event) => event.workerId),
       ...taskIds.map((taskId) => taskById.get(taskId)?.workerId)
@@ -342,7 +338,6 @@ export function correlateScheduleBatches(
 
     const pids = uniqueSortedNumbers([
       reporter.pid,
-      ...requestIds.flatMap((request) => request.pidSet),
       ...matchedSchedulingEvents.map((event) => event.pid),
       ...matchedResponseEvents.map((event) => event.pid),
       ...taskIds.map((taskId) => taskById.get(taskId)?.pid)
@@ -370,7 +365,7 @@ export function correlateScheduleBatches(
       dpRanks,
       schedulingEventIds: matchedSchedulingEvents.map((event) => event.id),
       responseEventIds: matchedResponseEvents.map((event) => event.id),
-      requestIds: requestIds.map((request) => request.id),
+      requestIds: [],
       taskIds,
       lookupTaskIds: collectTaskIds(batchLookupTasks),
       lookupCount: batchLookupTasks.length,
@@ -390,14 +385,9 @@ export function correlateScheduleBatches(
       posixDumpTotalMs: posixDumpStats.totalMs
     };
 
-    for (const request of requestIds) {
-      if (!request.relatedScheduleBatchIds.includes(batch.id)) {
-        request.relatedScheduleBatchIds.push(batch.id);
-      }
-    }
-
     return batch;
   });
-
-  return batches.sort((left, right) => (left.startMs ?? Number.MAX_SAFE_INTEGER) - (right.startMs ?? Number.MAX_SAFE_INTEGER));
+  const sortedBatches = batches.sort((left, right) => (left.startMs ?? Number.MAX_SAFE_INTEGER) - (right.startMs ?? Number.MAX_SAFE_INTEGER));
+  assignRequestsToBatches(requests, sortedBatches);
+  return sortedBatches;
 }
