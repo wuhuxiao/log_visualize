@@ -28,6 +28,8 @@ const MAX_ZOOM = 64;
 const LANE_HEIGHT = 34;
 const OVERSCAN_LANES = 10;
 const DEFAULT_VIEWPORT_HEIGHT = 720;
+const KEYBOARD_PAN_STEP = 0.08;
+const KEYBOARD_PAN_STEP_LARGE = 0.2;
 
 function getItemRange(items: TimelineItem[]) {
   let min = Number.POSITIVE_INFINITY;
@@ -147,6 +149,15 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
     return padding.left + clamp(((value - visibleMin) / (visibleMax - visibleMin)) * innerWidth, 0, innerWidth);
   };
 
+  const handleKeyboardPan = (direction: "left" | "right", largeStep = false) => {
+    if (zoom <= 1.001) {
+      return;
+    }
+    const step = largeStep ? KEYBOARD_PAN_STEP_LARGE : KEYBOARD_PAN_STEP;
+    const delta = direction === "left" ? -step : step;
+    setPan((current) => clamp(current + delta, 0, 1));
+  };
+
   if (items.length === 0) {
     return (
       <div className="empty-state">
@@ -157,7 +168,21 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
   }
 
   return (
-    <div ref={containerRef} className="timeline-shell">
+    <div
+      ref={containerRef}
+      className="timeline-shell"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          handleKeyboardPan("left", event.shiftKey);
+        }
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          handleKeyboardPan("right", event.shiftKey);
+        }
+      }}
+    >
       <div className="timeline-header">
         <div className="timeline-title">{title}</div>
         <div className="timeline-controls">
@@ -185,6 +210,7 @@ export function TimelineChart({ title, items, initialZoom = 1, onItemClick }: Ti
         </span>
         <span>缩放: {zoom.toFixed(2)}x</span>
         <span>显示 lane: {Math.max(0, endLaneIndex - startLaneIndex + 1)} / {lanes.length}</span>
+        <span>← / → 平移，Shift + ← / → 快速平移</span>
       </div>
 
       <div className="timeline-legend">
