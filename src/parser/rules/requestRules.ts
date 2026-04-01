@@ -14,6 +14,7 @@ const requestRules: RequestRule[] = [
   { pattern: /Request Prefill Complete/i, eventName: "prefill_complete" },
   { pattern: /Get kv release request/i, eventName: "kv_release_requested" },
   { pattern: /send control request/i, eventName: "control_request_sent" },
+  { pattern: /Backendmanager control request successfully/i, eventName: "control_request_sent" },
   { pattern: /Get a new ControlRequest from server/i, eventName: "control_request_received" },
   { pattern: /Send Release KV response/i, eventName: "release_kv_response" },
   { pattern: /Request life endup/i, eventName: "request_end" },

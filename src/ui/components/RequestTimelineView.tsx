@@ -38,21 +38,21 @@ interface RequestTimelineViewProps {
 
 const DETAIL_EXPAND_THRESHOLD = 40;
 const REQUEST_COLORS = {
-  receive: "#1d4ed8",
+  receive: "#2563eb",
   waiting: "#0f766e",
   schedule: "#f59e0b",
-  lookup: "#7c3aed",
-  cacheLoad: "#14b8a6",
+  lookup: "#8b5cf6",
+  cacheLoad: "#06b6d4",
   modelCompute: "#ef4444",
-  cacheDump: "#b45309",
-  kvTransfer: "#8b5cf6"
+  cacheDump: "#f97316",
+  kvTransfer: "#22c55e"
 } as const;
 
 const phaseChartConfig: Array<{ key: keyof RequestPhaseMetrics; label: string; color: string }> = [
   { key: "queueWaitMs", label: "Queue wait", color: REQUEST_COLORS.waiting },
   { key: "lookupMs", label: "Store lookup", color: REQUEST_COLORS.lookup },
   { key: "cacheLoadMs", label: "Cache load", color: REQUEST_COLORS.cacheLoad },
-  { key: "modelComputeMs", label: "Model compute", color: REQUEST_COLORS.modelCompute },
+  { key: "modelComputeMs", label: "Model forward", color: REQUEST_COLORS.modelCompute },
   { key: "cacheDumpMs", label: "Cache dump", color: REQUEST_COLORS.cacheDump },
   { key: "kvTransferFinishMs", label: "KV transfer / finish", color: REQUEST_COLORS.kvTransfer }
 ];

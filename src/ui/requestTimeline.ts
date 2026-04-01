@@ -159,10 +159,16 @@ export function deriveRequestTimeline(
       }
       return max === undefined ? currentEnd : Math.max(max, currentEnd);
     }, undefined);
-    const loadStartAt = [lookupEndAt, scheduleAt]
+    const scheduleAnchorAt =
+      scheduleAt ??
+      batch.startMs ??
+      lookupStartAt ??
+      waitingCursor ??
+      requestEnteredAt;
+    const loadStartAt = [lookupEndAt, scheduleAnchorAt]
       .filter((value): value is number => value !== undefined)
       .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined);
-    const computeStartAt = [scheduleAt, latestLoadFinishAt]
+    const computeStartAt = [scheduleAnchorAt, latestLoadFinishAt]
       .filter((value): value is number => value !== undefined)
       .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined);
     const earliestCacheDumpStartAt = taskGroups.cacheDumpTasks.reduce<number | undefined>((min, task) => {
@@ -179,19 +185,31 @@ export function deriveRequestTimeline(
       }
       return max === undefined ? currentEnd : Math.max(max, currentEnd);
     }, undefined);
-    const computeEndCandidates = [request.stages.prefillCompleteAt, earliestCacheDumpStartAt].filter(
+    const computeEndCandidates = [
+      request.stages.prefillCompleteAt,
+      request.stages.decodeFinishedAt,
+      earliestCacheDumpStartAt
+    ].filter(
       (value): value is number => value !== undefined
     );
     const computeEndAt =
       computeEndCandidates.length > 0
         ? Math.min(...computeEndCandidates)
-        : request.stages.prefillCompleteAt ?? earliestCacheDumpStartAt ?? batch.reporterMs ?? batch.executionEndMs;
+        : request.stages.prefillCompleteAt ??
+          request.stages.decodeFinishedAt ??
+          earliestCacheDumpStartAt ??
+          batch.reporterMs ??
+          batch.executionEndMs;
     const kvStageEndAt =
-      requestFinishedAt ??
       request.stages.controlRequestAt ??
       request.stages.releaseResponseAt ??
-      request.stages.kvReleaseAt;
-    const kvTransferStartAt = latestCacheDumpEndAt ?? request.stages.prefillCompleteAt ?? computeEndAt;
+      request.stages.kvReleaseAt ??
+      requestFinishedAt;
+    const kvTransferStartAt =
+      request.stages.decodeFinishedAt ??
+      latestCacheDumpEndAt ??
+      request.stages.prefillCompleteAt ??
+      computeEndAt;
 
     if (waitingCursor !== undefined && scheduleAt !== undefined && scheduleAt > waitingCursor) {
       const durationMs = scheduleAt - waitingCursor;
@@ -253,7 +271,7 @@ export function deriveRequestTimeline(
       metrics.modelComputeMs = (metrics.modelComputeMs ?? 0) + durationMs;
       phases.push({
         key: "modelCompute",
-        label: "Model compute",
+        label: "Model forward",
         start: computeStartAt,
         end: computeEndAt,
         batchId: batch.id,

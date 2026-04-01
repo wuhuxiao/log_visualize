@@ -39,6 +39,7 @@ const scheduledBatchSource: LogSource = {
     "[2026-03-31 17:02:10.065091] [901] [1104] [llm] [INFO] [model_exec_output_handler.cpp:65] [LlmEngine|Request-Publish Complete] DP RankId: 0. Request Prefill Complete, llmMgrReqId:20001, seqId: 301, pInstanceId:0, localDPRank_:0",
     "[2026-03-31 17:02:10.080211] [901] [1105] [server] [INFO] [dmi_msg_receiver.cpp:99] [endpoint] Get kv release request, reqId is 20001",
     "[2026-03-31 17:02:10.080544] [901] [1106] [llm] [INFO] [llm_manager_impl.cpp:1762] Get a new ControlRequest from server, llmMgrReqId: 20001, EngineReqId: eng20001, with operation:2",
+    "[2026-03-31 17:02:10.080620] [901] [1106] [server] [INFO] [infer_backend_manager.cpp:402] [infer_backend_manager] Backendmanager control request successfully, RequestId is 20001",
     "[2026-03-31 17:02:10.080694] [901] [1106] [llm] [INFO] [llm_engine.cpp:236] [LlmEngine] DP RankId: 0. Send Release KV response(EngineReqId: eng20001) successfully.",
     "[2026-03-31 17:02:10.080992] [901] [1106] [llm] [INFO] [llm_manager_impl.cpp:1888] Request life endup, llmMgrReqId: 20001, final status: success",
     "[2026-03-31 17:02:10.081411] [901] [1203] [llm] [INFO] [llm_engine.cpp:478] [Scheduler|Schedule-Response] Response and schedule transfer cost too long. DP RankId:0, response cost:1880, ScheduleExecTransfer cost:0, scheduleCost:66, totalIterCost:1946, schedulingRound:101",
@@ -105,6 +106,7 @@ describe("analyzeSources", () => {
     expect(batch?.responseEventIds.length).toBe(1);
     expect(batch?.reporterMs).toBeDefined();
     expect(request?.relatedScheduleBatchIds).toContain(batch?.id ?? "");
+    expect(request?.stages.controlRequestAt).toBeDefined();
   });
 
   it("marks request anomalies using cache bandwidth and model compute percentiles", () => {
