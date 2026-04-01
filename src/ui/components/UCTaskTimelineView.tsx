@@ -56,7 +56,7 @@ export function UCTaskTimelineView({
       const color = task.category === "Lookup" ? "#6366f1" : isDump ? "#b45309" : "#0f766e";
       const bandwidth = formatBandwidth(bandwidthMBps(task));
       const cost = formatDuration(task.costMs);
-      const labelParts = [task.category, task.taskId ?? "", cost, bandwidth].filter(Boolean);
+      const labelParts = [task.category, cost, bandwidth].filter(Boolean);
       const label = labelParts.join(" ");
 
       return {
