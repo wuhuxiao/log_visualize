@@ -37,6 +37,7 @@ interface RequestPhaseMetrics {
   lookupMs?: number;
   cacheLoadMs?: number;
   modelComputeMs?: number;
+  cacheDumpMs?: number;
   kvTransferFinishMs?: number;
 }
 
@@ -48,6 +49,7 @@ const REQUEST_COLORS = {
   lookup: "#7c3aed",
   cacheLoad: "#14b8a6",
   modelCompute: "#ef4444",
+  cacheDump: "#b45309",
   kvTransfer: "#8b5cf6"
 } as const;
 
@@ -56,6 +58,7 @@ const phaseChartConfig: Array<{ key: keyof RequestPhaseMetrics; label: string; c
   { key: "lookupMs", label: "Store lookup", color: REQUEST_COLORS.lookup },
   { key: "cacheLoadMs", label: "Cache load", color: REQUEST_COLORS.cacheLoad },
   { key: "modelComputeMs", label: "Model compute", color: REQUEST_COLORS.modelCompute },
+  { key: "cacheDumpMs", label: "Cache dump", color: REQUEST_COLORS.cacheDump },
   { key: "kvTransferFinishMs", label: "KV transfer / finish", color: REQUEST_COLORS.kvTransfer }
 ];
 
@@ -271,7 +274,31 @@ export function RequestTimelineView({
         const computeStartAt = [scheduleAt, latestLoadFinishAt]
           .filter((value): value is number => value !== undefined)
           .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined);
-        const computeEndAt = request.stages.prefillCompleteAt ?? reporterAt;
+        const relatedCacheDumpTasks = batch.cacheDumpTaskIds
+          .map((taskId) => taskById.get(taskId))
+          .filter((task): task is NormalizedUCTask => task !== undefined);
+        const earliestCacheDumpStartAt = relatedCacheDumpTasks.reduce<number | undefined>((min, task) => {
+          const currentStart = taskStart(task);
+          if (currentStart === undefined) {
+            return min;
+          }
+          return min === undefined ? currentStart : Math.min(min, currentStart);
+        }, undefined);
+        const latestCacheDumpEndAt = relatedCacheDumpTasks.reduce<number | undefined>((max, task) => {
+          const currentEnd = taskEnd(task);
+          if (currentEnd === undefined) {
+            return max;
+          }
+          return max === undefined ? currentEnd : Math.max(max, currentEnd);
+        }, undefined);
+        const computeEndCandidates = [
+          request.stages.prefillCompleteAt,
+          earliestCacheDumpStartAt
+        ].filter((value): value is number => value !== undefined);
+        const computeEndAt =
+          computeEndCandidates.length > 0
+            ? Math.min(...computeEndCandidates)
+            : request.stages.prefillCompleteAt ?? earliestCacheDumpStartAt ?? reporterAt;
         const kvStageEndAt =
           requestFinishedAt ??
           request.stages.controlRequestAt ??
@@ -385,18 +412,51 @@ export function RequestTimelineView({
         }
 
         if (
-          request.stages.prefillCompleteAt !== undefined &&
-          kvStageEndAt !== undefined &&
-          kvStageEndAt > request.stages.prefillCompleteAt &&
+          earliestCacheDumpStartAt !== undefined &&
+          latestCacheDumpEndAt !== undefined &&
+          latestCacheDumpEndAt > earliestCacheDumpStartAt &&
           batchIndex === batches.length - 1
         ) {
-          const kvTransferFinishMs = kvStageEndAt - request.stages.prefillCompleteAt;
+          const cacheDumpMs = latestCacheDumpEndAt - earliestCacheDumpStartAt;
+          metrics.cacheDumpMs = cacheDumpMs;
+          nextItems.push({
+            id: `request:${batchKey}:cache-dump`,
+            lane: mainLane,
+            label: "Cache dump",
+            start: earliestCacheDumpStartAt,
+            end: latestCacheDumpEndAt,
+            color: REQUEST_COLORS.cacheDump,
+            legendKey: "request-cache-dump",
+            legendLabel: "Cache dump",
+            selected: isSelected,
+            meta: {
+              requestId: label,
+              batchId: batch.id,
+              durationMs: cacheDumpMs,
+              taskCount: relatedCacheDumpTasks.length
+            },
+            anomaly: request.anomalies.length > 0
+          });
+        }
+
+        const kvTransferStartAt =
+          latestCacheDumpEndAt ??
+          request.stages.prefillCompleteAt ??
+          computeEndAt;
+
+        if (
+          kvTransferStartAt !== undefined &&
+          kvStageEndAt !== undefined &&
+          kvStageEndAt > kvTransferStartAt &&
+          batchIndex === batches.length - 1
+        ) {
+          const kvTransferFinishMs = kvStageEndAt - kvTransferStartAt;
           metrics.kvTransferFinishMs = kvTransferFinishMs;
           nextItems.push({
             id: `request:${batchKey}:kv-transfer-finish`,
             lane: mainLane,
             label: "KV transfer / finish",
-            start: request.stages.prefillCompleteAt,
+            start: kvTransferStartAt,
             end: kvStageEndAt,
             color: REQUEST_COLORS.kvTransfer,
             legendKey: "request-kv-transfer-finish",
@@ -405,7 +465,7 @@ export function RequestTimelineView({
             meta: {
               requestId: label,
               batchId: batch.id,
-              prefillCompleteAt: request.stages.prefillCompleteAt,
+              kvTransferStartAt,
               finishedAt: kvStageEndAt,
               durationMs: kvTransferFinishMs
             },
