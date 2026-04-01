@@ -1,4 +1,18 @@
-import type { AnalysisResult, FilterState, NormalizedRequest, NormalizedUCTask, ParsedEvent } from "../types/models";
+import type {
+  AnalysisResult,
+  FilterState,
+  NormalizedRequest,
+  NormalizedUCTask,
+  ParsedEvent,
+  ScheduleBatch,
+  SchedulerEvent
+} from "../types/models";
+
+export interface RequestMetricSnapshot {
+  cacheLoadBandwidthMBps?: number;
+  cacheDumpBandwidthMBps?: number;
+  modelComputeMs?: number;
+}
 
 function matchesSearch(event: ParsedEvent, searchText: string) {
   if (!searchText) {
@@ -34,6 +48,140 @@ function matchesCoreFilters(
   return workerOk && pidOk && dpOk && eventOk && searchMatches && anomalyOk;
 }
 
+function taskEnd(task: NormalizedUCTask) {
+  return task.finishAt ?? task.startAt ?? task.dispatchAt;
+}
+
+function aggregateBandwidth(taskIds: string[], taskMap: Map<string, NormalizedUCTask>) {
+  const tasks = [...new Set(taskIds)]
+    .map((taskId) => taskMap.get(taskId))
+    .filter(
+      (task): task is NormalizedUCTask =>
+        task !== undefined && task.bytes !== undefined && task.costMs !== undefined && task.costMs > 0
+    );
+
+  if (tasks.length === 0) {
+    return undefined;
+  }
+
+  const totalBytes = tasks.reduce((sum, task) => sum + (task.bytes ?? 0), 0);
+  const totalCostMs = tasks.reduce((sum, task) => sum + (task.costMs ?? 0), 0);
+
+  if (totalBytes <= 0 || totalCostMs <= 0) {
+    return undefined;
+  }
+
+  return totalBytes / 1024 / 1024 / (totalCostMs / 1000);
+}
+
+function computeBatchModelComputeMs(
+  request: NormalizedRequest,
+  batch: ScheduleBatch,
+  taskMap: Map<string, NormalizedUCTask>,
+  schedulerEventMap: Map<string, SchedulerEvent>
+) {
+  const computeEndAt = request.stages.prefillCompleteAt;
+  if (computeEndAt === undefined) {
+    return undefined;
+  }
+
+  const schedulingEvents = batch.schedulingEventIds
+    .map((eventId) => schedulerEventMap.get(eventId))
+    .filter((event): event is SchedulerEvent => event !== undefined)
+    .filter((event) => request.dpRank === undefined || event.requestRef?.dpRank === request.dpRank);
+
+  const latestSchedulingAt = schedulingEvents.reduce<number | undefined>((max, event) => {
+    if (event.timestampMs === undefined) {
+      return max;
+    }
+    return max === undefined ? event.timestampMs : Math.max(max, event.timestampMs);
+  }, undefined);
+
+  const relatedLoadTasks = [...batch.cacheLoadTaskIds, ...batch.posixLoadTaskIds]
+    .map((taskId) => taskMap.get(taskId))
+    .filter((task): task is NormalizedUCTask => task !== undefined);
+
+  const latestLoadFinishAt = relatedLoadTasks.reduce<number | undefined>((max, task) => {
+    const endAt = taskEnd(task);
+    if (endAt === undefined) {
+      return max;
+    }
+    return max === undefined ? endAt : Math.max(max, endAt);
+  }, undefined);
+
+  const computeStartAt = [latestSchedulingAt, latestLoadFinishAt]
+    .filter((value): value is number => value !== undefined)
+    .reduce<number | undefined>((max, value) => (max === undefined ? value : Math.max(max, value)), undefined);
+
+  if (computeStartAt === undefined || computeEndAt < computeStartAt) {
+    return undefined;
+  }
+
+  return computeEndAt - computeStartAt;
+}
+
+export function buildRequestMetricSnapshots(result: AnalysisResult) {
+  const taskMap = new Map(result.ucTasks.map((task) => [task.id, task]));
+  const batchMap = new Map(result.scheduleBatches.map((batch) => [batch.id, batch]));
+  const schedulerEventMap = new Map(
+    result.events
+      .filter((event): event is SchedulerEvent => event.eventType === "scheduler" && event.eventName === "scheduler_scheduling")
+      .map((event) => [event.id, event])
+  );
+
+  const snapshots = new Map<string, RequestMetricSnapshot>();
+
+  for (const request of result.requests) {
+    const batches = request.relatedScheduleBatchIds
+      .map((batchId) => batchMap.get(batchId))
+      .filter((batch): batch is ScheduleBatch => batch !== undefined);
+
+    const cacheLoadBandwidths = batches
+      .map((batch) => aggregateBandwidth(batch.cacheLoadTaskIds, taskMap))
+      .filter((value): value is number => value !== undefined);
+
+    const cacheDumpBandwidths = batches
+      .map((batch) => aggregateBandwidth(batch.cacheDumpTaskIds, taskMap))
+      .filter((value): value is number => value !== undefined);
+
+    const modelComputeDurations = batches
+      .map((batch) => computeBatchModelComputeMs(request, batch, taskMap, schedulerEventMap))
+      .filter((value): value is number => value !== undefined);
+
+    snapshots.set(request.id, {
+      cacheLoadBandwidthMBps:
+        cacheLoadBandwidths.length > 0 ? Math.min(...cacheLoadBandwidths) : undefined,
+      cacheDumpBandwidthMBps:
+        cacheDumpBandwidths.length > 0 ? Math.min(...cacheDumpBandwidths) : undefined,
+      modelComputeMs:
+        modelComputeDurations.length > 0 ? Math.max(...modelComputeDurations) : undefined
+    });
+  }
+
+  return snapshots;
+}
+
+function matchesCustomRequestThresholds(metrics: RequestMetricSnapshot | undefined, filters: FilterState) {
+  const thresholds = filters.customRequestThresholds;
+  if (!thresholds.enabled) {
+    return true;
+  }
+
+  const loadOk =
+    thresholds.maxCacheLoadBandwidthMBps === undefined ||
+    ((metrics?.cacheLoadBandwidthMBps ?? Number.POSITIVE_INFINITY) <= thresholds.maxCacheLoadBandwidthMBps);
+
+  const dumpOk =
+    thresholds.maxCacheDumpBandwidthMBps === undefined ||
+    ((metrics?.cacheDumpBandwidthMBps ?? Number.POSITIVE_INFINITY) <= thresholds.maxCacheDumpBandwidthMBps);
+
+  const computeOk =
+    thresholds.minModelComputeMs === undefined ||
+    ((metrics?.modelComputeMs ?? Number.NEGATIVE_INFINITY) >= thresholds.minModelComputeMs);
+
+  return loadOk && dumpOk && computeOk;
+}
+
 export function filterEvents(result: AnalysisResult, filters: FilterState): ParsedEvent[] {
   return result.events.filter((event) =>
     matchesCoreFilters(
@@ -54,6 +202,8 @@ export function filterRequests(
   visibleEvents: ParsedEvent[]
 ): NormalizedRequest[] {
   const visibleEventIds = new Set(visibleEvents.map((event) => event.id));
+  const requestMetrics = buildRequestMetricSnapshots(result);
+
   return result.requests.filter((request) => {
     const matchesIds =
       !filters.searchText ||
@@ -67,8 +217,9 @@ export function filterRequests(
     const dpOk = filters.dpRanks.length === 0 || (request.dpRank !== undefined && filters.dpRanks.includes(request.dpRank));
     const eventOk = filters.eventTypes.length === 0 || filters.eventTypes.includes("request");
     const anomalyOk = !filters.onlyAnomalies || request.anomalies.length > 0;
+    const thresholdOk = matchesCustomRequestThresholds(requestMetrics.get(request.id), filters);
     const hasVisibleEvent = request.lifecycleEvents.some((event) => visibleEventIds.has(event.id));
-    return workerOk && pidOk && dpOk && eventOk && anomalyOk && matchesIds && hasVisibleEvent;
+    return workerOk && pidOk && dpOk && eventOk && anomalyOk && matchesIds && hasVisibleEvent && thresholdOk;
   });
 }
 

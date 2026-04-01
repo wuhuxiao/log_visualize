@@ -94,6 +94,85 @@ export function SidebarFilters({
       </section>
 
       <section className="panel-section">
+        <h2>异常请求筛选</h2>
+        <label className="checkbox-row">
+          <input
+            type="checkbox"
+            checked={filters.customRequestThresholds.enabled}
+            onChange={(event) =>
+              onFiltersChange({
+                ...filters,
+                customRequestThresholds: {
+                  ...filters.customRequestThresholds,
+                  enabled: event.target.checked
+                }
+              })
+            }
+          />
+          启用自定义阈值
+        </label>
+        <div className="threshold-grid">
+          <label className="threshold-field">
+            <span>Cache load 带宽 ≤ MB/s</span>
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              value={filters.customRequestThresholds.maxCacheLoadBandwidthMBps ?? ""}
+              onChange={(event) =>
+                onFiltersChange({
+                  ...filters,
+                  customRequestThresholds: {
+                    ...filters.customRequestThresholds,
+                    maxCacheLoadBandwidthMBps:
+                      event.target.value === "" ? undefined : Number(event.target.value)
+                  }
+                })
+              }
+            />
+          </label>
+          <label className="threshold-field">
+            <span>Cache dump 带宽 ≤ MB/s</span>
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              value={filters.customRequestThresholds.maxCacheDumpBandwidthMBps ?? ""}
+              onChange={(event) =>
+                onFiltersChange({
+                  ...filters,
+                  customRequestThresholds: {
+                    ...filters.customRequestThresholds,
+                    maxCacheDumpBandwidthMBps:
+                      event.target.value === "" ? undefined : Number(event.target.value)
+                  }
+                })
+              }
+            />
+          </label>
+          <label className="threshold-field">
+            <span>Model compute ≥ ms</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={filters.customRequestThresholds.minModelComputeMs ?? ""}
+              onChange={(event) =>
+                onFiltersChange({
+                  ...filters,
+                  customRequestThresholds: {
+                    ...filters.customRequestThresholds,
+                    minModelComputeMs:
+                      event.target.value === "" ? undefined : Number(event.target.value)
+                  }
+                })
+              }
+            />
+          </label>
+        </div>
+      </section>
+
+      <section className="panel-section">
         <h2>Worker / PID</h2>
         {distinctWorkers.length > 0 ? (
           <div className="check-grid">

@@ -264,4 +264,10 @@ export interface FilterState {
   eventTypes: EventType[];
   searchText: string;
   onlyAnomalies: boolean;
+  customRequestThresholds: {
+    enabled: boolean;
+    maxCacheLoadBandwidthMBps?: number;
+    maxCacheDumpBandwidthMBps?: number;
+    minModelComputeMs?: number;
+  };
 }

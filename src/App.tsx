@@ -20,7 +20,10 @@ const defaultFilters: FilterState = {
   dpRanks: [],
   eventTypes: [],
   searchText: "",
-  onlyAnomalies: false
+  onlyAnomalies: false,
+  customRequestThresholds: {
+    enabled: false
+  }
 };
 
 async function filesToSources(files: FileList): Promise<LogSource[]> {
