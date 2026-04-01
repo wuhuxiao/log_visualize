@@ -147,7 +147,6 @@ export default function App() {
         sources={sources}
         onFiltersChange={setFilters}
         onFilesSelected={handleFilesSelected}
-        onLoadSample={handleLoadSample}
         onExportJson={() => downloadJson("normalized-log-analysis.json", result)}
       />
 

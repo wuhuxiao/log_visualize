@@ -1,6 +1,5 @@
 import type { ChangeEvent } from "react";
 import type { EventType, FilterState, LogSource } from "../../types/models";
-import { SAMPLE_LOGS } from "../../sample-data";
 
 interface SidebarFiltersProps {
   filters: FilterState;
@@ -11,7 +10,6 @@ interface SidebarFiltersProps {
   sources: LogSource[];
   onFiltersChange: (filters: FilterState) => void;
   onFilesSelected: (files: FileList | null) => void;
-  onLoadSample: (sampleIds: string[]) => void;
   onExportJson: () => void;
 }
 
@@ -20,7 +18,6 @@ export function SidebarFilters({
   sources,
   onFiltersChange,
   onFilesSelected,
-  onLoadSample,
   onExportJson
 }: SidebarFiltersProps) {
   const onUpload = (event: ChangeEvent<HTMLInputElement>) => {
@@ -37,15 +34,6 @@ export function SidebarFilters({
           <input type="file" accept=".log,.txt" multiple onChange={onUpload} />
         </label>
         <div className="button-stack">
-          <button type="button" onClick={() => onLoadSample(["demo"])}>
-            Load demo
-          </button>
-          <button type="button" onClick={() => onLoadSample(["demo", "mixed-workers"])}>
-            Load multi-file sample
-          </button>
-          <button type="button" onClick={() => onLoadSample(SAMPLE_LOGS.map((sample) => sample.id))}>
-            Load all samples
-          </button>
           <button type="button" onClick={onExportJson}>
             Export normalized JSON
           </button>
