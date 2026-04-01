@@ -24,7 +24,7 @@ interface TimelineChartProps {
 }
 
 const MIN_BAR_LABEL_WIDTH = 84;
-const MAX_ZOOM = 24;
+const MAX_ZOOM = 16;
 const LANE_HEIGHT = 34;
 const OVERSCAN_LANES = 10;
 const DEFAULT_VIEWPORT_HEIGHT = 720;
